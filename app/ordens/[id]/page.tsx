@@ -7,10 +7,10 @@ import {
   ChevronLeft, ClipboardList, User, Monitor, 
   FileText, Camera, Users, LayoutGrid, 
   CircleDollarSign, Settings, CheckCircle2, XCircle, Loader2, FolderOpen,
-  PlayCircle, PauseCircle, Pencil
+  PlayCircle, PauseCircle, Pencil, Ruler
 } from 'lucide-react'
 
-// Interfaces
+// --- INTERFACES ---
 type OrdemServico = {
   id: number
   numero_os: number | null
@@ -38,6 +38,12 @@ type Material = {
   tipo: string
   descricao: string
   quantidade: string
+  // Campos técnicos adicionados
+  espessura?: string
+  diametro?: string
+  diametro_interno?: string
+  comprimento?: string
+  largura?: string
 }
 
 type Atualizacao = {
@@ -66,7 +72,6 @@ export default function DetalhesOSPage() {
   const [numOSFaturam, setNumOSFaturam] = useState('')
   const [salvandoDadosExtras, setSalvandoDadosExtras] = useState(false)
 
-  // Estados para Controle de Operação
   const [tecnicoAtuante, setTecnicoAtuante] = useState('')
   const [atividadeExecutada, setAtividadeExecutada] = useState('')
   const [mostrarCampoAndamento, setMostrarCampoAndamento] = useState(false)
@@ -123,16 +128,14 @@ export default function DetalhesOSPage() {
     const { data: upds } = await supabase.from('os_atualizacoes').select('*').eq('ordem_servico_id', id).order('created_at', { ascending: false })
     setAtualizacoes(upds || [])
 
+    // Busca todos os campos da tabela de materiais
     const { data: mats } = await supabase.from('materiais_os').select('*').eq('id_os', id)
     setMateriais(mats || [])
 
     setCarregando(false)
   }
 
-  const podeEditarSempre = perfilUsuario && [
-    'Engenheiro', 'Diretor', 'Encarregado de Produção'
-  ].includes(perfilUsuario)
-
+  // --- FUNÇÕES DE AÇÃO ---
   async function atualizarStatusExecucao(novoStatus: string) {
     if (!ordem) return
     
@@ -242,9 +245,11 @@ export default function DetalhesOSPage() {
     setSalvandoDadosExtras(false)
   }
 
+  // --- ESTILOS E CONDICIONAIS ---
   const clean = tema === 'clean'
   const encerrada = ordem?.status === 'Finalizado' || ordem?.status === 'Cancelado'
   const exibirFaturamento = ordem && ordem.status !== 'Cancelado' && ordem.status !== 'Nova'
+  const podeEditarSempre = perfilUsuario && ['Engenheiro', 'Diretor', 'Encarregado de Produção'].includes(perfilUsuario)
 
   if (carregando) return (
     <div className={`min-h-screen flex items-center justify-center font-bold ${clean ? 'bg-slate-50 text-slate-400' : 'bg-[#07111f] text-blue-500'}`}>
@@ -306,19 +311,18 @@ export default function DetalhesOSPage() {
 
             {mostrarCampoAndamento && (
               <div className="mt-4 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 space-y-3 animate-in fade-in zoom-in duration-200">
-                <p className="text-[9px] font-black uppercase text-blue-500 italic">Detalhes da Execução</p>
                 <input 
                   type="text" 
                   value={tecnicoAtuante} 
                   onChange={(e) => setTecnicoAtuante(e.target.value)}
                   placeholder="Nome do técnico..."
-                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none ${clean ? 'bg-white border-slate-200' : 'bg-[#111c2e] border-slate-700'}`}
+                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#111c2e] border-slate-700 text-white'}`}
                 />
                 <textarea 
                   value={atividadeExecutada} 
                   onChange={(e) => setAtividadeExecutada(e.target.value)}
                   placeholder="O que está sendo feito?"
-                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none min-h-[80px] ${clean ? 'bg-white border-slate-200' : 'bg-[#111c2e] border-slate-700'}`}
+                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none min-h-[80px] ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#111c2e] border-slate-700 text-white'}`}
                 />
                 <button 
                   onClick={() => atualizarStatusExecucao('Em andamento')}
@@ -333,12 +337,11 @@ export default function DetalhesOSPage() {
 
             {mostrarCampoParada && (
               <div className="mt-4 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-3 animate-in fade-in zoom-in duration-200">
-                <p className="text-[9px] font-black uppercase text-amber-500 italic">Qual o motivo da parada?</p>
                 <textarea 
                   value={motivoParada} 
                   onChange={(e) => setMotivoParada(e.target.value)}
-                  placeholder="Descreva aqui..."
-                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none min-h-[80px] ${clean ? 'bg-white border-slate-200' : 'bg-[#111c2e] border-slate-700'}`}
+                  placeholder="Qual o motivo da parada?"
+                  className={`w-full p-3 rounded-xl text-sm font-bold border outline-none min-h-[80px] ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#111c2e] border-slate-700 text-white'}`}
                 />
                 <button 
                   onClick={() => atualizarStatusExecucao('Parado')}
@@ -389,21 +392,39 @@ export default function DetalhesOSPage() {
           </div>
         </section>
 
-        {/* MATERIAIS */}
+        {/* MATERIAIS - QUADRO ATUALIZADO */}
         <div className="mb-6">
           {!encerrada && (
             <button onClick={() => router.push(`/ordens/${id_os}/material`)} className={`w-full py-4 mb-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-3 ${clean ? 'border-blue-500/30 text-blue-600' : 'border-blue-500/20 text-blue-400'}`}>
               <span className="font-black uppercase text-xs">Acrescentar Material</span>
             </button>
           )}
+          
           {materiais.length > 0 && (
             <div className={`rounded-3xl p-6 border ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-              <h2 className="font-black uppercase text-xs mb-4">Peças / Materiais</h2>
-              <div className="space-y-2">
+              <h2 className="font-black uppercase text-xs mb-4">Materiais / Peças</h2>
+              <div className="space-y-3">
                 {materiais.map((m) => (
-                  <div key={m.id} className="flex justify-between items-center p-3 bg-slate-500/5 rounded-xl border border-white/5">
-                    <span className="text-xs font-bold uppercase">{m.descricao || m.tipo}</span>
-                    <span className="text-xs font-black text-blue-500">x{m.quantidade}</span>
+                  <div key={m.id} className="p-4 bg-slate-500/5 rounded-2xl border border-white/5">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-sm font-black uppercase text-blue-500 italic">
+                        {m.tipo?.replace('_', ' ')}
+                      </span>
+                      <span className="text-xs font-black px-2 py-1 bg-blue-500/10 rounded-lg text-blue-500">
+                        x{m.quantidade}
+                      </span>
+                    </div>
+                    
+                    <p className="text-xs font-bold uppercase mb-2">{m.descricao}</p>
+                    
+                    {/* Grid Dinâmico de Dimensões Técnicas */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 pt-3 border-t border-white/5">
+                      {m.espessura && <MedidaDetalhe label="Espessura" valor={`${m.espessura}mm`} />}
+                      {m.diametro && <MedidaDetalhe label={m.tipo?.includes('tubo') ? "Ø Externo" : "Ø Diâmetro"} valor={`${m.diametro}mm`} />}
+                      {m.diametro_interno && <MedidaDetalhe label="Ø Interno" valor={`${m.diametro_interno}mm`} />}
+                      {m.largura && <MedidaDetalhe label="Largura" valor={`${m.largura}mm`} />}
+                      {m.comprimento && <MedidaDetalhe label="Comprimento" valor={`${m.comprimento}mm`} />}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -434,29 +455,35 @@ export default function DetalhesOSPage() {
         {/* FATURAMENTO */}
         {exibirFaturamento && (
           <section className={`rounded-3xl p-6 mb-8 border ${ordem.status === 'Finalizado' ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-blue-500/40 bg-blue-500/5'} ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-            <h2 className="font-black uppercase text-xs mb-4">Faturamento</h2>
+            <h2 className="font-black uppercase text-xs mb-4 text-blue-500">Dados de Faturamento</h2>
             <div className="space-y-4">
-              <input type="text" value={numPedido} onChange={(e) => setNumPedido(e.target.value)} placeholder="Nº Pedido" className={`w-full rounded-xl p-4 text-sm font-bold border outline-none ${clean ? 'bg-slate-50' : 'bg-[#111c2e] border-slate-700'}`} />
-              <input type="text" value={numOSFaturam} onChange={(e) => setNumOSFaturam(e.target.value)} placeholder="Nº OS Sistema" className={`w-full rounded-xl p-4 text-sm font-bold border outline-none ${clean ? 'bg-slate-50' : 'bg-[#111c2e] border-slate-700'}`} />
-              <button onClick={salvarDadosFaturamento} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg">Salvar Dados</button>
+              <input type="text" value={numPedido} onChange={(e) => setNumPedido(e.target.value)} placeholder="Nº Pedido de Venda" className={`w-full rounded-xl p-4 text-sm font-bold border outline-none ${clean ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-[#111c2e] border-slate-700 text-white'}`} />
+              <input type="text" value={numOSFaturam} onChange={(e) => setNumOSFaturam(e.target.value)} placeholder="Nº OS do Sistema Principal" className={`w-full rounded-xl p-4 text-sm font-bold border outline-none ${clean ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-[#111c2e] border-slate-700 text-white'}`} />
+              <button 
+                onClick={salvarDadosFaturamento} 
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform"
+                disabled={salvandoDadosExtras}
+              >
+                {salvandoDadosExtras ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Salvar no Faturamento'}
+              </button>
             </div>
           </section>
         )}
 
-        {/* FINALIZAR / CANCELAR */}
+        {/* BOTÕES FINAIS */}
         {!encerrada && (
           <div className="grid grid-cols-2 gap-4 mb-10">
-            <button onClick={() => alterarStatus('Cancelado')} className="flex flex-col items-center p-5 rounded-3xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+            <button onClick={() => alterarStatus('Cancelado')} className="flex flex-col items-center p-5 rounded-3xl bg-rose-500/10 text-rose-500 border border-rose-500/20 active:scale-95 transition-transform">
               <XCircle size={28} className="mb-2" /> <span className="text-[10px] font-black uppercase">Cancelar</span>
             </button>
-            <button onClick={() => alterarStatus('Finalizado')} className="flex flex-col items-center p-5 rounded-3xl bg-emerald-500 text-white shadow-lg">
-              <CheckCircle2 size={28} className="mb-2" /> <span className="text-[10px] font-black uppercase">Finalizar</span>
+            <button onClick={() => alterarStatus('Finalizado')} className="flex flex-col items-center p-5 rounded-3xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform">
+              <CheckCircle2 size={28} className="mb-2" /> <span className="text-[10px] font-black uppercase">Finalizar OS</span>
             </button>
           </div>
         )}
       </main>
 
-      {/* MENU INFERIOR */}
+      {/* MENU NAVEGAÇÃO */}
       <nav className={`fixed bottom-0 left-0 right-0 border-t py-3 px-6 z-50 ${clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'}`}>
         <div className="max-w-md mx-auto flex justify-between items-center">
           <MenuNav titulo="Início" Icone={LayoutGrid} clean={clean} onClick={() => router.push('/dashboard')} />
@@ -469,7 +496,7 @@ export default function DetalhesOSPage() {
       {/* MODAL EDIÇÃO */}
       {modalEdicao && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[101] flex items-center justify-center p-6">
-            <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-700'}`}>
+            <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-slate-900' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
                 <h2 className="text-lg font-black uppercase italic mb-6">Editar OS</h2>
                 <div className="space-y-4">
                     <input value={editForm.cliente} onChange={(e) => setEditForm({...editForm, cliente: e.target.value})} placeholder="Cliente" className={`w-full rounded-xl p-3 border outline-none ${clean ? 'bg-slate-50' : 'bg-[#111c2e]'}`} />
@@ -479,7 +506,7 @@ export default function DetalhesOSPage() {
                     <button onClick={salvarEdicaoOS} disabled={salvandoEdicao} className="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-white shadow-lg flex items-center justify-center">
                         {salvandoEdicao ? <Loader2 className="animate-spin" /> : 'Salvar Alterações'}
                     </button>
-                    <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold text-slate-500 uppercase">Fechar</button>
+                    <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold text-slate-500 uppercase mt-2">Fechar</button>
                 </div>
             </div>
         </div>
@@ -487,6 +514,8 @@ export default function DetalhesOSPage() {
     </div>
   )
 }
+
+// --- COMPONENTES AUXILIARES ---
 
 function InfoItem({ Icone, titulo, texto, full, clean }: any) {
   return (
@@ -508,6 +537,17 @@ function MenuNav({ titulo, Icone, ativo, clean, onClick }: any) {
       <Icone size={22} strokeWidth={ativo ? 3 : 2} />
       <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
     </button>
+  )
+}
+
+function MedidaDetalhe({ label, valor }: { label: string, valor: string }) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-[8px] font-black uppercase opacity-40 leading-none mb-1 flex items-center gap-1">
+        <Ruler size={8} /> {label}
+      </span>
+      <span className="text-xs font-bold">{valor}</span>
+    </div>
   )
 }
 
