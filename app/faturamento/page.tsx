@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { 
-  ArrowLeft, Search, ChevronDown, Calendar, CheckCircle2, 
+  ArrowLeft, Search, Calendar, CheckCircle2, 
   XCircle, Info, LayoutGrid, ClipboardList, CircleDollarSign, 
   Settings, Hash, Receipt
 } from 'lucide-react'
@@ -18,7 +18,6 @@ export default function FaturamentoPage() {
   const [carregando, setCarregando] = useState(true)
   const [tema, setTema] = useState<'dark' | 'clean'>('dark')
   
-  // Estados para o Modal de Faturamento
   const [modalAberto, setModalAberto] = useState(false)
   const [osSelecionada, setOsSelecionada] = useState<any>(null)
   const [numPedido, setNumPedido] = useState('')
@@ -64,7 +63,8 @@ export default function FaturamentoPage() {
 
   const pendentesFaturar = ordens.filter(o => !o.faturado).length
 
-  const prepararFaturamento = (ordem: any) => {
+  const prepararFaturamento = (e: React.MouseEvent, ordem: any) => {
+    e.stopPropagation() // Impede de abrir o relatório ao clicar para faturar
     if (!podeEditar) return
     setOsSelecionada(ordem)
     setNumPedido(ordem.numero_pedido_faturamento || '')
@@ -72,41 +72,46 @@ export default function FaturamentoPage() {
     setModalAberto(true)
   }
 
-  async function confirmarFaturamento() {
-    if (!osSelecionada) return
+  async function confirmarFaturamento(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!osSelecionada || !numPedido) return
     setSalvando(true)
 
-    const { error } = await supabase
-      .from('ordens_servico')
-      .update({ 
-        faturado: true,
-        numero_pedido_faturamento: numPedido,
-        numero_os_faturamento: numSistema,
-        data_faturamento: new Date().toISOString()
-      })
-      .eq('id', osSelecionada.id)
+    try {
+      const { error } = await supabase
+        .from('ordens_servico')
+        .update({ 
+          faturado: true,
+          numero_pedido_faturamento: numPedido,
+          numero_os_faturamento: numSistema,
+          data_faturamento: new Date().toISOString()
+        })
+        .eq('id', osSelecionada.id)
 
-    if (!error) {
+      if (error) throw error
+
+      // Atualiza apenas o item na lista local para evitar refresh de página
       setOrdens(lista => lista.map(o => o.id === osSelecionada.id ? 
         { ...o, faturado: true, numero_pedido_faturamento: numPedido, numero_os_faturamento: numSistema } : o))
+      
       setModalAberto(false)
       setOsSelecionada(null)
-      setNumPedido('')
-      setNumSistema('')
+    } catch (error: any) {
+      alert("Erro ao salvar faturamento: " + error.message)
+    } finally {
+      setSalvando(false)
     }
-    setSalvando(false)
   }
 
-  async function estornarFaturamento(id: number) {
-    if (!podeEditar || !confirm("Deseja marcar esta OS como não faturada?")) return
+  async function estornarFaturamento(e: React.MouseEvent, id: number) {
+    e.stopPropagation()
+    if (!podeEditar || !confirm("Deseja estornar este faturamento?")) return
     
     const { error } = await supabase
       .from('ordens_servico')
-      .update({ 
-        faturado: false, 
-        numero_pedido_faturamento: null, 
-        numero_os_faturamento: null 
-      })
+      .update({ faturado: false, numero_pedido_faturamento: null, numero_os_faturamento: null })
       .eq('id', id)
 
     if (!error) {
@@ -134,18 +139,7 @@ export default function FaturamentoPage() {
               </div>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black shadow-lg">
-            {usuarioLogado?.nome?.charAt(0).toUpperCase()}
-          </div>
         </header>
-
-        {/* ALERTA DE PERMISSÃO */}
-        {!podeEditar && !carregando && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex gap-3 items-center">
-            <Info size={18} className="text-amber-500 shrink-0" />
-            <p className="text-[11px] text-amber-200 font-medium">Seu perfil não possui permissão para faturar ordens.</p>
-          </div>
-        )}
 
         {/* BUSCA */}
         <div className={`flex items-center gap-3 p-4 rounded-2xl border mb-6 ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-slate-800'}`}>
@@ -161,91 +155,77 @@ export default function FaturamentoPage() {
         {/* LISTAGEM */}
         <div className="space-y-4">
           {carregando ? (
-            <div className="py-20 text-center opacity-50 italic">Carregando dados...</div>
-          ) : ordensFiltradas.length === 0 ? (
-            <div className="py-20 text-center opacity-40 text-sm">Nenhuma OS finalizada encontrada.</div>
-          ) : (
-            ordensFiltradas.map((ordem) => (
-              <div 
-                key={ordem.id} 
-                onClick={() => router.push(`/ordens/${ordem.id}`)}
-                className={`rounded-[2rem] border p-6 transition-all cursor-pointer active:scale-[0.98] hover:shadow-xl ${
-                  ordem.faturado 
-                    ? 'border-emerald-500/30 bg-emerald-500/5' 
-                    : clean ? 'bg-white border-slate-100 shadow-sm' : 'bg-[#0b1628] border-slate-800'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
-                    ordem.faturado ? 'bg-emerald-500 text-white' : 'bg-blue-500/10 text-blue-500'
-                  }`}>
-                    {ordem.faturado ? 'Faturado' : `OS #${ordem.numero_os ?? ordem.id}`}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold opacity-40 uppercase">
-                    <Calendar size={12} />
-                    {new Date(ordem.created_at).toLocaleDateString('pt-BR')}
-                  </div>
-                </div>
-
-                <h3 className="font-black text-base uppercase mb-1 truncate leading-tight">
-                  {ordem.cliente}
-                </h3>
-                <p className="text-xs font-bold opacity-50 mb-6 truncate uppercase tracking-tight">
-                  {ordem.maquina}
-                </p>
-
-                {/* BOTÕES DE AÇÃO - STOP PROPAGATION PARA NÃO ABRIR O RELATÓRIO */}
-                <div onClick={(e) => e.stopPropagation()}>
-                  {!ordem.faturado ? (
-                    <button 
-                      onClick={() => prepararFaturamento(ordem)}
-                      disabled={!podeEditar}
-                      className="w-full py-4 rounded-[1.2rem] bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      Concluir Faturamento
-                    </button>
-                  ) : (
-                    <div className="flex flex-col gap-3">
-                      <div className={`p-4 rounded-2xl border flex justify-between items-center ${clean ? 'bg-slate-50' : 'bg-white/5 border-white/10'}`}>
-                        <div>
-                          <p className="text-[9px] uppercase font-black opacity-40 mb-1">Documentação</p>
-                          <div className="flex gap-3 text-[11px] font-black text-emerald-500">
-                            <span>PED: {ordem.numero_pedido_faturamento || '---'}</span>
-                            <span className="opacity-30">|</span>
-                            <span>OS: {ordem.numero_os_faturamento || '---'}</span>
-                          </div>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                          <CheckCircle2 size={16} className="text-emerald-500" />
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => estornarFaturamento(ordem.id)}
-                        className="text-[10px] font-black text-rose-500 uppercase py-2 hover:bg-rose-500/5 rounded-lg transition-colors"
-                      >
-                        Estornar Faturamento
-                      </button>
-                    </div>
-                  )}
+            <div className="py-20 text-center opacity-50 italic">Carregando...</div>
+          ) : ordensFiltradas.map((ordem) => (
+            <div 
+              key={ordem.id} 
+              onClick={() => router.push(`/ordens/${ordem.id}`)}
+              className={`rounded-[2rem] border p-6 transition-all cursor-pointer active:scale-[0.98] ${
+                ordem.faturado 
+                  ? 'border-emerald-500/30 bg-emerald-500/5' 
+                  : clean ? 'bg-white border-slate-100 shadow-sm' : 'bg-[#0b1628] border-slate-800'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase ${
+                  ordem.faturado ? 'bg-emerald-500 text-white' : 'bg-blue-500/10 text-blue-500'
+                }`}>
+                  {ordem.faturado ? 'Faturado' : `OS #${ordem.numero_os ?? ordem.id}`}
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold opacity-40">
+                  <Calendar size={12} />
+                  {new Date(ordem.created_at).toLocaleDateString('pt-BR')}
                 </div>
               </div>
-            ))
-          )}
+
+              <h3 className="font-black text-base uppercase mb-1 truncate">{ordem.cliente}</h3>
+              <p className="text-xs font-bold opacity-50 mb-6 truncate uppercase">{ordem.maquina}</p>
+
+              <div onClick={(e) => e.stopPropagation()}>
+                {!ordem.faturado ? (
+                  <button 
+                    onClick={(e) => prepararFaturamento(e, ordem)}
+                    disabled={!podeEditar}
+                    className="w-full py-4 rounded-[1.2rem] bg-blue-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 disabled:opacity-30"
+                  >
+                    Concluir Faturamento
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <div className={`p-4 rounded-2xl border flex justify-between items-center ${clean ? 'bg-slate-50' : 'bg-white/5 border-white/10'}`}>
+                      <div>
+                        <p className="text-[9px] uppercase font-black opacity-40 mb-1">Documentação</p>
+                        <div className="flex gap-3 text-[11px] font-black text-emerald-500">
+                          <span>PED: {ordem.numero_pedido_faturamento}</span>
+                          <span>SIS: {ordem.numero_os_faturamento}</span>
+                        </div>
+                      </div>
+                      <CheckCircle2 size={16} className="text-emerald-500" />
+                    </div>
+                    <button 
+                      onClick={(e) => estornarFaturamento(e, ordem.id)}
+                      className="text-[10px] font-black text-rose-500 uppercase py-2"
+                    >
+                      Estornar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </main>
 
-      {/* MODAL DE FATURAMENTO */}
+      {/* MODAL */}
       {modalAberto && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className={`w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in slide-in-from-bottom-8 duration-300 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className={`w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}
+          >
             <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="font-black text-lg uppercase tracking-tight">Finalizar OS</h2>
-                <p className="text-[10px] font-bold opacity-40 uppercase">Vincular documentos de venda</p>
-              </div>
-              <button onClick={() => setModalAberto(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
-                <XCircle size={24} className="opacity-50" />
-              </button>
+              <h2 className="font-black text-lg uppercase tracking-tight">Finalizar OS</h2>
+              <button onClick={() => setModalAberto(false)}><XCircle size={24} className="opacity-50" /></button>
             </div>
 
             <div className="space-y-5">
@@ -253,34 +233,22 @@ export default function FaturamentoPage() {
                 <label className="text-[10px] font-black uppercase opacity-40 ml-1">Nº Pedido de Venda</label>
                 <div className={`flex items-center gap-3 p-4 rounded-2xl border mt-1.5 ${clean ? 'bg-slate-50' : 'bg-black/20 border-slate-800'}`}>
                   <Receipt size={18} className="text-blue-500" />
-                  <input 
-                    type="text" 
-                    value={numPedido} 
-                    onChange={e => setNumPedido(e.target.value)}
-                    placeholder="000000" 
-                    className="bg-transparent outline-none w-full font-bold text-sm"
-                  />
+                  <input type="text" value={numPedido} onChange={e => setNumPedido(e.target.value)} placeholder="000000" className="bg-transparent outline-none w-full font-bold text-sm" />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase opacity-40 ml-1">Nº OS do Sistema Principal</label>
+                <label className="text-[10px] font-black uppercase opacity-40 ml-1">Nº OS do Sistema</label>
                 <div className={`flex items-center gap-3 p-4 rounded-2xl border mt-1.5 ${clean ? 'bg-slate-50' : 'bg-black/20 border-slate-800'}`}>
                   <Hash size={18} className="text-blue-500" />
-                  <input 
-                    type="text" 
-                    value={numSistema} 
-                    onChange={e => setNumSistema(e.target.value)}
-                    placeholder="Ex: 5020" 
-                    className="bg-transparent outline-none w-full font-bold text-sm"
-                  />
+                  <input type="text" value={numSistema} onChange={e => setNumSistema(e.target.value)} placeholder="5020" className="bg-transparent outline-none w-full font-bold text-sm" />
                 </div>
               </div>
 
               <button 
                 onClick={confirmarFaturamento}
                 disabled={salvando || !numPedido}
-                className="w-full py-5 rounded-[1.5rem] bg-emerald-600 text-white font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-30 mt-4"
+                className="w-full py-5 rounded-[1.5rem] bg-emerald-600 text-white font-black uppercase tracking-widest active:scale-95 disabled:opacity-30 mt-4"
               >
                 {salvando ? 'Salvando...' : 'Confirmar Faturamento'}
               </button>
@@ -289,10 +257,8 @@ export default function FaturamentoPage() {
         </div>
       )}
 
-      {/* MENU INFERIOR FIXO */}
-      <nav className={`fixed bottom-0 left-0 right-0 border-t py-3 z-50 ${
-        clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'
-      }`}>
+      {/* NAV */}
+      <nav className={`fixed bottom-0 left-0 right-0 border-t py-3 z-50 ${clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'}`}>
         <div className="max-w-md mx-auto grid grid-cols-4 px-4">
           <MenuItem clean={clean} titulo="Início" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
           <MenuItem clean={clean} titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
@@ -306,13 +272,9 @@ export default function FaturamentoPage() {
 
 function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center py-1 transition-all ${
-      ativo ? 'text-blue-500 scale-110' : clean ? 'text-slate-400' : 'text-slate-500'
-    }`}>
+    <button onClick={onClick} className={`flex flex-col items-center justify-center py-1 ${ativo ? 'text-blue-500 scale-110' : clean ? 'text-slate-400' : 'text-slate-500'}`}>
       <Icone size={22} strokeWidth={ativo ? 3 : 2} />
-      <span className={`mt-1 text-[9px] font-black uppercase tracking-tighter ${ativo ? 'opacity-100' : 'opacity-60'}`}>
-        {titulo}
-      </span>
+      <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
     </button>
   )
 }
