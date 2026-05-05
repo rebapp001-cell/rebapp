@@ -242,7 +242,7 @@ export default function DashboardPage() {
                     {isFaturada && (
                       <div className="mt-2 text-[10px] font-bold text-emerald-500/80 flex gap-3">
                         {ordem.numero_pedido_faturamento && <span>PED: {ordem.numero_pedido_faturamento}</span>}
-                        {ordem.numero_os_faturamento && <span>SISTEMA: {ordem.numero_os_faturamento}</span>}
+                        {ordem.numero_os_faturamento && <span>OS SISTEMA: {ordem.numero_os_faturamento}</span>}
                       </div>
                     )}
 
