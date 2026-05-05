@@ -308,12 +308,13 @@ export default function DetalhesOSPage() {
         </main>
       </div>
 
-      {/* MENU - NO-PRINT */}
-      <nav className={`no-print fixed bottom-0 left-0 right-0 border-t py-4 px-8 z-50 ${clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'}`}>
-        <div className="max-w-md mx-auto flex justify-between">
+      {/* MENU - NO-PRINT (BOTÃO CONFIGURAÇÃO ADICIONADO) */}
+      <nav className={`no-print fixed bottom-0 left-0 right-0 border-t py-4 px-6 z-50 ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#07111f] border-slate-800 text-white'}`}>
+        <div className="max-w-md mx-auto flex justify-between items-center">
             <MenuNav titulo="Home" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
             <MenuNav ativo titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
             <MenuNav titulo="Faturas" Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
+            <MenuNav titulo="Ajustes" Icone={Settings} onClick={() => router.push('/configuracao')} />
         </div>
       </nav>
 
@@ -350,7 +351,7 @@ function InfoItem({ Icone, titulo, texto, full, clean }: any) {
 
 function MenuNav({ titulo, Icone, ativo, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 ${ativo ? 'text-blue-500' : 'text-slate-500'}`}>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 min-w-[60px] transition-colors ${ativo ? 'text-blue-500' : 'text-slate-500'}`}>
       <Icone size={20}/><span className="text-[9px] font-black uppercase">{titulo}</span>
     </button>
   )
