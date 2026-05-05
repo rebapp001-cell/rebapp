@@ -7,7 +7,7 @@ import {
   LogOut, Plus, ClipboardList, CircleDollarSign, Settings, 
   Play, Pause, CheckCircle2, XCircle,
   LayoutGrid, User, ArrowUpRight, Wifi, WifiOff,
-  Receipt // Ícone importado para faturamento
+  Receipt 
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -72,10 +72,10 @@ export default function DashboardPage() {
 
     if (dadosUsuario) setUsuarioLogado(dadosUsuario)
 
-    // Selecionando explicitamente os campos de faturamento
+    // Adicionado o campo 'status_faturamento' explicitamente na busca
     const { data: dadosOrdens } = await supabase
       .from('ordens_servico')
-      .select('*, numero_pedido_faturamento, numero_os_faturamento')
+      .select('*, numero_pedido_faturamento, numero_os_faturamento, status_faturamento')
       .order('created_at', { ascending: false })
 
     const lista = dadosOrdens || []
@@ -192,8 +192,25 @@ export default function DashboardPage() {
               <div className="py-10 text-center text-slate-400 text-sm italic">Nenhum registro encontrado.</div>
             ) : (
               (filtroStatus === 'todas' ? ordensFiltradas.slice(0, 5) : ordensFiltradas).map((ordem) => {
-                // Lógica de verificação de faturamento
-                const isFaturada = !!(ordem.numero_pedido_faturamento || ordem.numero_os_faturamento);
+                
+                // --- LÓGICA DE FATURAMENTO COM 3 ESTADOS ---
+                const statusFat = ordem.status_faturamento; // Esperado: 'Faturado', 'Parcialmente Faturado' ou null/vazio
+                const temNumeros = !!(ordem.numero_pedido_faturamento || ordem.numero_os_faturamento);
+                
+                let fatLabel = "Pendente";
+                let fatStyles = "bg-slate-500/20 text-slate-400 border border-slate-500/30";
+
+                if (statusFat === 'Faturado') {
+                    fatLabel = "Faturado";
+                    fatStyles = "bg-emerald-500 text-white shadow-sm";
+                } else if (statusFat === 'Parcialmente Faturado' || statusFat === 'Parcial') {
+                    fatLabel = "Parcial";
+                    fatStyles = "bg-amber-500 text-white shadow-sm";
+                } else if (temNumeros && !statusFat) {
+                    // Fallback para manter compatibilidade se o status_faturamento não foi preenchido
+                    fatLabel = "Faturado";
+                    fatStyles = "bg-emerald-500 text-white shadow-sm";
+                }
 
                 return (
                   <div 
@@ -209,13 +226,9 @@ export default function DashboardPage() {
                         
                         {/* INDICADOR DE FATURAMENTO PARA FINALIZADAS */}
                         {ordem.status === 'Finalizado' && (
-                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${
-                            isFaturada 
-                            ? 'bg-emerald-500 text-white shadow-sm' 
-                            : 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
-                          }`}>
+                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${fatStyles}`}>
                             <Receipt size={10} />
-                            {isFaturada ? 'Faturada' : 'Pendente'}
+                            {fatLabel}
                           </div>
                         )}
                       </div>
@@ -239,10 +252,10 @@ export default function DashboardPage() {
                     </p>
 
                     {/* EXIBIÇÃO DOS DADOS DE FATURAMENTO SE EXISTIREM */}
-                    {isFaturada && (
-                      <div className="mt-2 text-[10px] font-bold text-emerald-500/80 flex gap-3">
+                    {temNumeros && (
+                      <div className="mt-2 text-[10px] font-bold text-emerald-500/80 flex flex-wrap gap-3">
                         {ordem.numero_pedido_faturamento && <span>PED: {ordem.numero_pedido_faturamento}</span>}
-                        {ordem.numero_os_faturamento && <span>OS SISTEMA: {ordem.numero_os_faturamento}</span>}
+                        {ordem.numero_os_faturamento && <span>OS: {ordem.numero_os_faturamento}</span>}
                       </div>
                     )}
 
@@ -286,7 +299,6 @@ export default function DashboardPage() {
   )
 }
 
-// ... (Subcomponentes Atalho, CardMini e MenuItem permanecem iguais)
 function Atalho({ titulo, Icone, onClick, destaque, clean }: any) {
   return (
     <button onClick={onClick} className={`h-20 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-90 border ${
