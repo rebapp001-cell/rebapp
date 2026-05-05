@@ -2,23 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Save, Layers, CircleDot, PipetteIcon as Pipe, Loader2 } from 'lucide-react'
+import { 
+  ArrowLeft, Save, Layers, CircleDot, PipetteIcon as Pipe, 
+  Settings, Anchor, Box, Loader2 
+} from 'lucide-react'
 import { supabase } from '../../../../lib/supabase'
 
-// Interface para os dados do formulário
 interface DadosMaterial {
   descricao: string
   espessura: string
   diametro: string
+  diametro_interno: string
   comprimento: string
   largura: string
   quantidade: string
 }
 
-// Interface para as propriedades do Input
 interface InputGeralProps {
   label: string
-  placeholder?: string // O '?' torna o placeholder opcional
+  placeholder?: string
   value: string
   onChange: (v: string) => void
   type?: string
@@ -38,6 +40,7 @@ export default function AdicionarMaterialPage() {
     descricao: '',
     espessura: '',
     diametro: '',
+    diametro_interno: '',
     comprimento: '',
     largura: '',
     quantidade: '1'
@@ -50,26 +53,26 @@ export default function AdicionarMaterialPage() {
 
   async function salvarMaterial() {
     if (!tipo) return alert('Selecione um tipo de material')
-    
     setLoading(true)
 
-    // Lógica para montar a descrição com as características
-    let descricaoFinal = dados.descricao.trim()
+    // Lógica de descrição detalhada expandida
+    let d = dados.descricao.trim()
+    const t = tipo.toUpperCase()
 
-    if (!descricaoFinal) {
-      if (tipo === 'chapa') {
-        descricaoFinal = `CHAPA ${dados.espessura}mm x ${dados.largura}mm x ${dados.comprimento}mm`
-      } else if (tipo === 'eixo') {
-        descricaoFinal = `EIXO Ø${dados.diametro}mm x ${dados.comprimento}mm`
-      } else if (tipo === 'tubo') {
-        descricaoFinal = `TUBO Ø${dados.diametro}mm x ${dados.comprimento}mm`
+    if (!d) {
+      if (tipo === 'chapa') d = `CHAPA ${dados.espessura}mm x ${dados.largura}mm x ${dados.comprimento}mm`
+      else if (tipo === 'eixo') d = `EIXO Ø${dados.diametro}mm x ${dados.comprimento}mm`
+      else if (tipo === 'tubo' || tipo === 'tubo_mecanico' || tipo === 'tubo_camisa') {
+        d = `${t.replace('_', ' ')} EXT Ø${dados.diametro}mm x INT Ø${dados.diametro_interno}mm x ${dados.comprimento}mm`
       }
+      else if (tipo === 'haste') d = `HASTE Ø${dados.diametro}mm x ${dados.comprimento}mm`
+      else if (tipo === 'tecnil') d = `TECNIL Ø${dados.diametro}mm x ${dados.comprimento}mm`
     }
     
     const novoMaterial = {
       id_os: Number(id_os), 
       tipo,
-      descricao: descricaoFinal, 
+      descricao: d, 
       espessura: dados.espessura,
       diametro: dados.diametro,
       comprimento: dados.comprimento,
@@ -80,18 +83,11 @@ export default function AdicionarMaterialPage() {
 
     try {
       const { error } = await supabase.from('materiais_os').insert([novoMaterial])
-
-      if (error) {
-        console.error('Erro Supabase:', error)
-        const pendentes = JSON.parse(localStorage.getItem('materiais_pendentes') || '[]')
-        localStorage.setItem('materiais_pendentes', JSON.stringify([...pendentes, novoMaterial]))
-        alert('Modo Offline: Salvo localmente.')
-        router.back()
-      } else {
-        router.back()
-      }
+      if (error) throw error
+      router.back()
     } catch (err) {
-      console.error('Erro crítico:', err)
+      console.error(err)
+      alert('Erro ao salvar. Verifique a conexão.')
     } finally {
       setLoading(false)
     }
@@ -100,8 +96,8 @@ export default function AdicionarMaterialPage() {
   const clean = tema === 'clean'
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${clean ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#07111f] text-white'} pb-10`}>
-      <header className={`p-6 flex items-center gap-4 border-b transition-colors ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-white/10'}`}>
+    <div className={`min-h-screen ${clean ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#07111f] text-white'} pb-10`}>
+      <header className={`p-6 flex items-center gap-4 border-b ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-white/10'}`}>
         <button onClick={() => router.back()} className={`p-2 rounded-full ${clean ? 'hover:bg-slate-100 text-slate-600' : 'hover:bg-white/5 text-white'}`}>
           <ArrowLeft size={24} />
         </button>
@@ -113,11 +109,14 @@ export default function AdicionarMaterialPage() {
 
       <main className="p-6 max-w-md mx-auto space-y-6">
         <section>
-          <label className={`text-[10px] font-bold uppercase mb-3 block ${clean ? 'text-slate-400' : 'opacity-50'}`}>Tipo de Material</label>
-          <div className="grid grid-cols-3 gap-3">
+          <label className="text-[10px] font-bold uppercase mb-3 block opacity-50">Selecione o Material</label>
+          <div className="grid grid-cols-3 gap-2">
             <BotaoTipo clean={clean} ativo={tipo === 'chapa'} onClick={() => setTipo('chapa')} label="Chapa" Icone={Layers} />
             <BotaoTipo clean={clean} ativo={tipo === 'eixo'} onClick={() => setTipo('eixo')} label="Eixo" Icone={CircleDot} />
-            <BotaoTipo clean={clean} ativo={tipo === 'tubo'} onClick={() => setTipo('tubo')} label="Tubo" Icone={Pipe} />
+            <BotaoTipo clean={clean} ativo={tipo === 'haste'} onClick={() => setTipo('haste')} label="Haste" Icone={Anchor} />
+            <BotaoTipo clean={clean} ativo={tipo === 'tubo_mecanico'} onClick={() => setTipo('tubo_mecanico')} label="T. Mecân." Icone={Settings} />
+            <BotaoTipo clean={clean} ativo={tipo === 'tubo_camisa'} onClick={() => setTipo('tubo_camisa')} label="T. Camisa" Icone={Pipe} />
+            <BotaoTipo clean={clean} ativo={tipo === 'tecnil'} onClick={() => setTipo('tecnil')} label="Tecnil" Icone={Box} />
           </div>
         </section>
 
@@ -126,21 +125,26 @@ export default function AdicionarMaterialPage() {
             <div className="grid grid-cols-2 gap-4">
               {tipo === 'chapa' && (
                 <>
-                  <InputGeral clean={clean} label="Espessura (mm)" placeholder="Ex: 2.00" value={dados.espessura} onChange={(v: string) => setDados({...dados, espessura: v})} />
-                  <InputGeral clean={clean} label="Largura (mm)" placeholder="Ex: 1000" value={dados.largura} onChange={(v: string) => setDados({...dados, largura: v})} />
+                  <InputGeral clean={clean} label="Espessura (mm)" placeholder="0.00" value={dados.espessura} onChange={(v) => setDados({...dados, espessura: v})} />
+                  <InputGeral clean={clean} label="Largura (mm)" placeholder="0.00" value={dados.largura} onChange={(v) => setDados({...dados, largura: v})} />
                 </>
               )}
 
-              {(tipo === 'eixo' || tipo === 'tubo') && (
-                <InputGeral clean={clean} label="Diâmetro (mm)" placeholder="Ø Ex: 50.8" value={dados.diametro} onChange={(v: string) => setDados({...dados, diametro: v})} />
+              {/* Campos para tubos (Externo e Interno) */}
+              {(tipo.includes('tubo')) && (
+                <>
+                  <InputGeral clean={clean} label="Ø Externo (mm)" placeholder="0.00" value={dados.diametro} onChange={(v) => setDados({...dados, diametro: v})} />
+                  <InputGeral clean={clean} label="Ø Interno (mm)" placeholder="0.00" value={dados.diametro_interno} onChange={(v) => setDados({...dados, diametro_interno: v})} />
+                </>
               )}
 
-              <InputGeral clean={clean} label="Comprimento (mm)" placeholder="Ex: 500" value={dados.comprimento} onChange={(v: string) => setDados({...dados, comprimento: v})} />
-              <InputGeral clean={clean} label="Quantidade" type="number" value={dados.quantidade} onChange={(v: string) => setDados({...dados, quantidade: v})} />
-            </div>
+              {/* Campos para Eixo, Haste ou Tecnil */}
+              {(tipo === 'eixo' || tipo === 'haste' || tipo === 'tecnil') && (
+                <InputGeral clean={clean} label="Diâmetro (mm)" placeholder="Ø 0.00" value={dados.diametro} onChange={(v) => setDados({...dados, diametro: v})} />
+              )}
 
-            <div className="pt-2">
-               <InputGeral clean={clean} label="Descrição Personalizada" placeholder="Ex: Aço Inox 304" value={dados.descricao} onChange={(v: string) => setDados({...dados, descricao: v})} />
+              <InputGeral clean={clean} label="Comprimento (mm)" placeholder="0.00" value={dados.comprimento} onChange={(v) => setDados({...dados, comprimento: v})} />
+              <InputGeral clean={clean} label="Quantidade" type="number" value={dados.quantidade} onChange={(v) => setDados({...dados, quantidade: v})} />
             </div>
 
             <button
@@ -148,7 +152,7 @@ export default function AdicionarMaterialPage() {
               disabled={loading}
               className="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase mt-6 flex items-center justify-center gap-2 text-white active:scale-95 transition-all shadow-lg shadow-blue-600/20"
             >
-              {loading ? <LoaderLoading /> : <><Save size={20} /> Confirmar Material</>}
+              {loading ? <Loader2 className="animate-spin" /> : <><Save size={20} /> Confirmar</>}
             </button>
           </div>
         )}
@@ -157,44 +161,37 @@ export default function AdicionarMaterialPage() {
   )
 }
 
-// Componentes Auxiliares
-function BotaoTipo({ ativo, onClick, label, Icone, clean }: { ativo: boolean, onClick: () => void, label: string, Icone: any, clean: boolean }) {
+function BotaoTipo({ ativo, onClick, label, Icone, clean }: any) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
         ativo 
-          ? 'bg-blue-600 border-blue-400 text-white shadow-md' 
+          ? 'bg-blue-600 border-blue-400 text-white' 
           : clean 
             ? 'bg-white border-slate-200 text-slate-400' 
             : 'bg-[#0d1726] border-white/5 text-slate-500'
       }`}
     >
-      <Icone size={24} className="mb-2" />
-      <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
+      <Icone size={20} className="mb-1" />
+      <span className="text-[9px] font-black uppercase text-center">{label}</span>
     </button>
   )
 }
 
 function InputGeral({ label, placeholder, value, onChange, type = "text", clean }: InputGeralProps) {
   return (
-    <div className="flex flex-col gap-1.5 w-full">
-      <label className={`text-[10px] font-bold uppercase ml-1 ${clean ? 'text-slate-400' : 'opacity-40'}`}>{label}</label>
+    <div className="flex flex-col gap-1 w-full">
+      <label className="text-[10px] font-bold uppercase ml-1 opacity-50">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors ${
-          clean 
-            ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-300' 
-            : 'bg-[#0d1726] border-white/10 text-white placeholder:text-slate-600'
+        className={`border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 ${
+          clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#0d1726] border-white/10 text-white'
         } w-full`}
       />
     </div>
   )
-}
-
-function LoaderLoading() {
-  return <Loader2 className="w-5 h-5 animate-spin text-white" />
 }
