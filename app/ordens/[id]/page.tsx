@@ -116,16 +116,22 @@ export default function DetalhesOSPage() {
   async function gerarPDF() {
     if (!printRef.current) return
     setGerandoPDF(true)
+    
+    // Pequeno delay para garantir que o DOM está estável
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
       const element = printRef.current
+      
+      // Definição manual de cores hexadecimais para evitar erro de OKLCH
+      const bgColor = clean ? '#f8fafc' : '#07111f'
+
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        backgroundColor: clean ? '#f8fafc' : '#07111f',
+        backgroundColor: bgColor,
         ignoreElements: (el) => el.classList.contains('no-print')
       })
 
@@ -137,8 +143,8 @@ export default function DetalhesOSPage() {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
       pdf.save(`OS_${ordem?.numero_os || id_os}.pdf`)
     } catch (error) {
-      console.error(error)
-      alert("Erro ao gerar PDF.")
+      console.error('Erro detalhado:', error)
+      alert("Erro ao gerar PDF. Verifique o console para mais detalhes.")
     } finally {
       setGerandoPDF(false)
     }
