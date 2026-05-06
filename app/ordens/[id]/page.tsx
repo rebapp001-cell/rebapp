@@ -7,7 +7,8 @@ import {
   ChevronLeft, ClipboardList, User, Monitor, 
   FileText, Camera, Users, LayoutGrid, 
   CircleDollarSign, Settings, CheckCircle2, XCircle, Loader2,
-  PlayCircle, PauseCircle, Pencil, Download, X, ImagePlus
+  PlayCircle, PauseCircle, Pencil, Download, X, ImagePlus,
+  Trash2, CheckCircle
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -75,18 +76,8 @@ export default function DetalhesOSPage() {
     setCarregando(false)
   }
 
-  async function salvarEdicaoOS() {
-    setSalvandoEdicao(true)
-    const { error } = await supabase.from('ordens_servico').update({...editForm}).eq('id', ordem.id)
-    if (!error) {
-      setModalEdicao(false)
-      carregarDados()
-    }
-    setSalvandoEdicao(false)
-  }
-
   async function alterarStatus(novoStatus: string, descricaoAtividade: string) {
-    if (!descricaoAtividade) return alert("Descreva a atividade ou motivo.")
+    if (!descricaoAtividade) return alert("Descreva o motivo ou atividade.")
     
     await supabase.from('ordens_servico').update({ status: novoStatus }).eq('id', ordem.id)
     await supabase.from('os_atualizacoes').insert([{
@@ -102,10 +93,31 @@ export default function DetalhesOSPage() {
     carregarDados()
   }
 
+  async function finalizarOS() {
+    if (!confirm("Deseja realmente finalizar esta OS?")) return
+    await supabase.from('ordens_servico').update({ status: 'Finalizada' }).eq('id', ordem.id)
+    carregarDados()
+  }
+
+  async function cancelarOS() {
+    if (!confirm("Deseja realmente cancelar esta OS?")) return
+    await supabase.from('ordens_servico').update({ status: 'Cancelada' }).eq('id', ordem.id)
+    carregarDados()
+  }
+
+  async function salvarEdicaoOS() {
+    setSalvandoEdicao(true)
+    const { error } = await supabase.from('ordens_servico').update({...editForm}).eq('id', ordem.id)
+    if (!error) {
+      setModalEdicao(false)
+      carregarDados()
+    }
+    setSalvandoEdicao(false)
+  }
+
   async function gerarPDF() {
     if (!ordem) return
     setGerandoPDF(true)
-
     try {
       const container = document.createElement('div')
       container.style.position = 'fixed'
@@ -126,7 +138,6 @@ export default function DetalhesOSPage() {
               <p style="margin: 0;">Status: <span style="color: #2563eb; font-weight: bold;">${ordem.status.toUpperCase()}</span></p>
             </div>
           </div>
-
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
             <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
               <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #2563eb; text-transform: uppercase;">Cliente</p>
@@ -137,39 +148,12 @@ export default function DetalhesOSPage() {
               <p style="margin: 0; font-size: 14px; font-weight: bold;">${ordem.maquina}</p>
             </div>
           </div>
-
           <div style="margin-bottom: 30px;">
             <h2 style="font-size: 12px; font-weight: 800; border-left: 4px solid #2563eb; padding-left: 10px; margin-bottom: 15px; text-transform: uppercase;">Descrição</h2>
             <p style="font-size: 12px; line-height: 1.6;">${ordem.descricao}</p>
           </div>
-
-          ${materiais.length > 0 ? `
-            <div style="margin-bottom: 30px;">
-              <h2 style="font-size: 12px; font-weight: 800; border-left: 4px solid #2563eb; padding-left: 10px; margin-bottom: 15px; text-transform: uppercase;">Materiais</h2>
-              <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                <tr style="background: #f1f5f9;">
-                  <th style="border: 1px solid #e2e8f0; padding: 10px; text-align: left;">Item</th>
-                  <th style="border: 1px solid #e2e8f0; padding: 10px; text-align: center; width: 60px;">Qtd</th>
-                </tr>
-                ${materiais.map(m => `
-                  <tr>
-                    <td style="border: 1px solid #e2e8f0; padding: 8px;">${m.descricao}</td>
-                    <td style="border: 1px solid #e2e8f0; padding: 8px; text-align: center;">${m.quantidade}</td>
-                  </tr>
-                `).join('')}
-              </table>
-            </div>
-          ` : ''}
-
-          <div style="margin-bottom: 30px;">
-            <h2 style="font-size: 12px; font-weight: 800; border-left: 4px solid #2563eb; padding-left: 10px; margin-bottom: 15px; text-transform: uppercase;">Fotos</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              ${fotos.map(f => `
-                <div style="border: 1px solid #e2e8f0; padding: 5px; border-radius: 8px; background: #fff;">
-                  <img src="${f.url}" style="width: 100%; height: 180px; object-fit: cover;" crossorigin="anonymous" />
-                </div>
-              `).join('')}
-            </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            ${fotos.map(f => `<img src="${f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px;" crossorigin="anonymous" />`).join('')}
           </div>
         </div>
       `
@@ -200,7 +184,7 @@ export default function DetalhesOSPage() {
   if (carregando) return <div className="min-h-screen flex items-center justify-center font-black">CARREGANDO...</div>
 
   return (
-    <div className={`min-h-screen pb-24 transition-colors duration-300 ${clean ? 'bg-slate-50 text-slate-900' : 'bg-[#07111f] text-white'}`}>
+    <div className={`min-h-screen pb-32 transition-colors duration-300 ${clean ? 'bg-slate-50 text-slate-900' : 'bg-[#07111f] text-white'}`}>
       
       {/* HEADER */}
       <header className="pt-6 px-5 max-w-md mx-auto flex items-center justify-between gap-4">
@@ -237,53 +221,50 @@ export default function DetalhesOSPage() {
           </div>
         </div>
 
-        {/* CONTROLES DE STATUS (ANDAMENTO / PARADA) */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* CONTROLES DE STATUS (CINZA POR PADRÃO) */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
             <button 
               onClick={() => { setMostrarCampoAndamento(true); setMostrarCampoParada(false); }}
-              className="flex items-center justify-center gap-2 py-4 bg-emerald-500 rounded-2xl text-white font-black text-[10px] uppercase shadow-lg shadow-emerald-500/20"
+              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all shadow-lg ${ordem?.status === 'Em Andamento' ? 'bg-blue-600 text-white shadow-blue-600/20' : 'bg-slate-500/20 text-slate-500 shadow-none'}`}
             >
               <PlayCircle size={18} /> Em Andamento
             </button>
             <button 
               onClick={() => { setMostrarCampoParada(true); setMostrarCampoAndamento(false); }}
-              className="flex items-center justify-center gap-2 py-4 bg-amber-500 rounded-2xl text-white font-black text-[10px] uppercase shadow-lg shadow-amber-500/20"
+              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all shadow-lg ${ordem?.status === 'Parado' ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-slate-500/20 text-slate-500 shadow-none'}`}
             >
               <PauseCircle size={18} /> Parar Serviço
             </button>
         </div>
 
-        {/* CAMPOS DE INPUT PARA STATUS */}
+        {/* INPUTS DE STATUS */}
         {mostrarCampoAndamento && (
-          <div className={`mb-6 p-5 rounded-3xl border-2 border-emerald-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-            <p className="text-[10px] font-black uppercase text-emerald-500 mb-3">Relatar Início/Continuação</p>
-            <textarea 
-              value={atividadeExecutada}
-              onChange={(e) => setAtividadeExecutada(e.target.value)}
-              className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`}
-              placeholder="O que está sendo feito?"
-            />
-            <button onClick={() => alterarStatus('Em Andamento', atividadeExecutada)} className="w-full py-3 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase">Confirmar</button>
+          <div className={`mb-6 p-5 rounded-3xl border-2 border-blue-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
+            <textarea value={atividadeExecutada} onChange={(e) => setAtividadeExecutada(e.target.value)} className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`} placeholder="O que está sendo feito?" />
+            <button onClick={() => alterarStatus('Em Andamento', atividadeExecutada)} className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase">Confirmar Início</button>
+          </div>
+        )}
+        {mostrarCampoParada && (
+          <div className={`mb-6 p-5 rounded-3xl border-2 border-amber-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
+            <textarea value={motivoParada} onChange={(e) => setMotivoParada(e.target.value)} className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`} placeholder="Motivo da parada..." />
+            <button onClick={() => alterarStatus('Parado', motivoParada)} className="w-full py-3 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase">Confirmar Parada</button>
           </div>
         )}
 
-        {mostrarCampoParada && (
-          <div className={`mb-6 p-5 rounded-3xl border-2 border-amber-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-            <p className="text-[10px] font-black uppercase text-amber-500 mb-3">Motivo da Parada</p>
-            <textarea 
-              value={motivoParada}
-              onChange={(e) => setMotivoParada(e.target.value)}
-              className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`}
-              placeholder="Ex: Aguardando peça, horário de almoço..."
-            />
-            <button onClick={() => alterarStatus('Parado', motivoParada)} className="w-full py-3 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase">Pausar OS</button>
-          </div>
-        )}
+        {/* BOTÕES DE FINALIZAÇÃO E CANCELAMENTO */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+            <button onClick={finalizarOS} className="flex items-center justify-center gap-2 py-4 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-2xl font-black text-[10px] uppercase">
+              <CheckCircle size={18} /> Finalizar OS
+            </button>
+            <button onClick={cancelarOS} className="flex items-center justify-center gap-2 py-4 bg-red-600/10 text-red-500 border border-red-500/20 rounded-2xl font-black text-[10px] uppercase">
+              <Trash2 size={18} /> Cancelar OS
+            </button>
+        </div>
 
         {/* GALERIA */}
         <div className={`rounded-[32px] p-6 mb-6 border ${clean ? 'bg-white border-slate-100' : 'bg-[#0d1726] border-slate-800'}`}>
           <h2 className="text-[10px] font-black uppercase text-blue-500 mb-4">Fotos</h2>
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <label className="flex flex-col items-center justify-center gap-2 p-4 bg-blue-600 rounded-2xl cursor-pointer text-white">
               <Camera size={20} /><span className="text-[9px] font-black uppercase">Câmera</span>
               <input type="file" hidden capture="environment" accept="image/*" onChange={handleAddFoto} />
@@ -298,50 +279,30 @@ export default function DetalhesOSPage() {
           </div>
         </div>
 
-        {/* BOTAO MATERIAIS - AGORA ACIMA DO HISTÓRICO */}
-        <div className="mb-6">
-          <button 
-            onClick={() => router.push(`/ordens/${id_os}/material`)} 
-            className="w-full py-5 rounded-[32px] border-2 border-dashed border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
-          >
-            + Peças e Materiais
-          </button>
-          {materiais.length > 0 && (
-            <div className={`mt-3 p-4 rounded-2xl border ${clean ? 'bg-white border-slate-100' : 'bg-[#0d1726] border-slate-800'}`}>
-               {materiais.map(m => (
-                 <div key={m.id} className="flex justify-between items-center py-1 text-[11px] font-bold">
-                   <span className="opacity-70 uppercase">{m.descricao}</span>
-                   <span className="text-blue-500">x{m.quantidade}</span>
-                 </div>
-               ))}
-            </div>
-          )}
-        </div>
+        {/* BOTÃO MATERIAL */}
+        <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="w-full py-5 mb-6 rounded-[32px] border-2 border-dashed border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest">+ Adicionar Materiais</button>
 
         {/* HISTÓRICO */}
         <div className={`rounded-[32px] p-6 mb-6 border ${clean ? 'bg-white border-slate-100' : 'bg-[#0d1726] border-slate-800'}`}>
-          <h2 className="text-[10px] font-black uppercase text-purple-500 mb-6">Histórico de Atividades</h2>
+          <h2 className="text-[10px] font-black uppercase text-purple-500 mb-6">Histórico</h2>
           <div className="space-y-6">
             {atualizacoes.map((at) => (
               <div key={at.id} className="relative pl-6 border-l-2 border-purple-500/20">
                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#07111f] border-2 border-purple-500" />
-                <p className="text-[10px] font-black uppercase opacity-40 mb-1">
-                  {new Date(at.created_at).toLocaleDateString()} às {new Date(at.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </p>
+                <p className="text-[10px] font-black uppercase opacity-40 mb-1">{new Date(at.created_at).toLocaleString()}</p>
                 <p className="text-xs font-bold text-blue-400 mb-1">{at.usuario_nome}</p>
                 <p className="text-xs opacity-70 leading-relaxed">{at.descricao}</p>
               </div>
             ))}
           </div>
         </div>
-
       </main>
 
       {/* MODAL EDIÇÃO */}
       {modalEdicao && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
           <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
-            <h2 className="text-lg font-black uppercase mb-6 italic">Editar Dados</h2>
+            <h2 className="text-lg font-black uppercase mb-6">Editar Dados</h2>
             <div className="space-y-4">
               <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className={`w-full p-4 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Cliente" />
               <input value={editForm.solicitante} onChange={e => setEditForm({...editForm, solicitante: e.target.value})} className={`w-full p-4 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Solicitante" />
@@ -354,14 +315,23 @@ export default function DetalhesOSPage() {
         </div>
       )}
 
-      {/* NAV */}
-      <nav className={`fixed bottom-0 left-0 right-0 border-t py-4 px-8 flex justify-between items-center z-40 ${clean ? 'bg-white/80 border-slate-200 text-slate-400' : 'bg-[#07111f]/80 border-slate-800 text-slate-600'} backdrop-blur-xl`}>
-         <NavIcon Icon={LayoutGrid} onClick={() => router.push('/dashboard')} />
-         <NavIcon Icon={ClipboardList} active onClick={() => router.push('/ordens')} />
-         <NavIcon Icon={CircleDollarSign} onClick={() => router.push('/faturamento')} />
-         <NavIcon Icon={Settings} onClick={() => router.push('/configuracao')} />
-      </nav>
+      {/* MENU INFERIOR RESTAURADO */}
+      <footer className={`fixed bottom-0 left-0 right-0 border-t py-4 px-6 flex justify-around items-center z-40 ${clean ? 'bg-white/80 border-slate-200' : 'bg-[#07111f]/80 border-slate-800'} backdrop-blur-xl`}>
+        <NavItem Icon={LayoutGrid} label="Início" onClick={() => router.push('/dashboard')} />
+        <NavItem Icon={ClipboardList} label="Ordens" active onClick={() => router.push('/ordens')} />
+        <NavItem Icon={CircleDollarSign} label="Faturas" onClick={() => router.push('/faturamento')} />
+        <NavItem Icon={Settings} label="Ajustes" onClick={() => router.push('/configuracao')} />
+      </footer>
     </div>
+  )
+}
+
+function NavItem({ Icon, label, active, onClick }: any) {
+  return (
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-blue-500' : 'text-slate-500'}`}>
+      <Icon size={20} strokeWidth={active ? 3 : 2} />
+      <span className="text-[9px] font-black uppercase tracking-tighter">{label}</span>
+    </button>
   )
 }
 
@@ -374,13 +344,5 @@ function InfoBox({ label, value, Icon, clean }: any) {
         <p className="text-xs font-bold truncate">{value || '-'}</p>
       </div>
     </div>
-  )
-}
-
-function NavIcon({ Icon, active, onClick }: any) {
-  return (
-    <button onClick={onClick} className={`transition-all ${active ? 'text-blue-500 scale-110' : 'hover:text-blue-400'}`}>
-      <Icon size={22} strokeWidth={active ? 3 : 2} />
-    </button>
   )
 }
