@@ -76,23 +76,32 @@ export default function DetalhesOSPage() {
     setCarregando(false)
   }
 
-  async function alterarStatus(novoStatus: string, descricaoAtividade: string) {
-    if (!descricaoAtividade) return alert("Descreva o motivo ou atividade.")
+  async function alterarStatus(novoStatus: string, descricaoTexto: string) {
+    if (!descricaoTexto) return alert("Por favor, preencha a descrição.")
     
-    await supabase.from('ordens_servico').update({ status: novoStatus }).eq('id', ordem.id)
-    await supabase.from('os_atualizacoes').insert([{
-      ordem_servico_id: ordem.id,
-      descricao: descricaoAtividade,
-      usuario_nome: tecnicoAtuante || 'Técnico',
-      tipo_status: novoStatus // Campo para controlar a cor da bolinha no histórico
-    }])
-    
-    setMostrarCampoAndamento(false)
-    setMostrarCampoParada(false)
-    setAtividadeExecutada('')
-    setMotivoParada('')
-    setTecnicoAtuante('')
-    carregarDados()
+    try {
+      // 1. Atualiza status na tabela principal
+      await supabase.from('ordens_servico').update({ status: novoStatus }).eq('id', ordem.id)
+
+      // 2. Insere no histórico
+      const { error } = await supabase.from('os_atualizacoes').insert([{
+        ordem_servico_id: ordem.id,
+        descricao: tecnicoAtuante ? `[${tecnicoAtuante.toUpperCase()}]: ${descricaoTexto}` : descricaoTexto,
+        usuario_nome: tecnicoAtuante || 'Técnico',
+        tipo_status: novoStatus // Importante para a cor da bolinha
+      }])
+
+      if (error) throw error
+
+      setMostrarCampoAndamento(false)
+      setMostrarCampoParada(false)
+      setAtividadeExecutada('')
+      setMotivoParada('')
+      setTecnicoAtuante('')
+      carregarDados()
+    } catch (e) {
+      alert("Erro ao salvar atualização no banco.")
+    }
   }
 
   async function finalizarOS() {
@@ -107,16 +116,6 @@ export default function DetalhesOSPage() {
     carregarDados()
   }
 
-  async function salvarEdicaoOS() {
-    setSalvandoEdicao(true)
-    const { error } = await supabase.from('ordens_servico').update({...editForm}).eq('id', ordem.id)
-    if (!error) {
-      setModalEdicao(false)
-      carregarDados()
-    }
-    setSalvandoEdicao(false)
-  }
-
   async function gerarPDF() {
     if (!ordem) return
     setGerandoPDF(true)
@@ -124,53 +123,21 @@ export default function DetalhesOSPage() {
       const container = document.createElement('div')
       container.style.position = 'fixed'
       container.style.left = '-10000px'
-      container.style.top = '0'
       container.style.width = '210mm'
       container.style.backgroundColor = '#ffffff'
-
-      container.innerHTML = `
-        <div style="padding: 20mm; font-family: Arial, sans-serif; color: #1a1a1a;">
-          <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #2563eb; padding-bottom: 15px; margin-bottom: 25px;">
-            <div>
-              <h1 style="margin: 0; color: #2563eb; font-size: 26px; font-weight: 900;">RELATÓRIO TÉCNICO</h1>
-              <p style="margin: 5px 0; font-size: 12px; color: #4b5563;">Ordem de Serviço: <strong>#${ordem.numero_os || ordem.id}</strong></p>
-            </div>
-            <div style="text-align: right; font-size: 11px; color: #4b5563;">
-              <p style="margin: 0;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-              <p style="margin: 0;">Status: <span style="color: #2563eb; font-weight: bold;">${ordem.status.toUpperCase()}</span></p>
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-            <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-              <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #2563eb; text-transform: uppercase;">Cliente</p>
-              <p style="margin: 0; font-size: 14px; font-weight: bold;">${ordem.cliente}</p>
-            </div>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-              <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: bold; color: #2563eb; text-transform: uppercase;">Equipamento</p>
-              <p style="margin: 0; font-size: 14px; font-weight: bold;">${ordem.maquina}</p>
-            </div>
-          </div>
-          <div style="margin-bottom: 30px;">
-            <h2 style="font-size: 12px; font-weight: 800; border-left: 4px solid #2563eb; padding-left: 10px; margin-bottom: 15px; text-transform: uppercase;">Descrição</h2>
-            <p style="font-size: 12px; line-height: 1.6;">${ordem.descricao}</p>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            ${fotos.map(f => `<img src="${f.url}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px;" crossorigin="anonymous" />`).join('')}
-          </div>
-        </div>
-      `
+      container.innerHTML = `<div style="padding: 20mm; color: #000;"><h1>Relatório OS #${ordem.id}</h1><p>Cliente: ${ordem.cliente}</p></div>`
       document.body.appendChild(container)
-      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: "#ffffff" })
+      const canvas = await html2canvas(container, { scale: 2, useCORS: true })
       const imgData = canvas.toDataURL('image/jpeg', 0.95)
       const pdf = new jsPDF('p', 'mm', 'a4')
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, (canvas.height * 210) / canvas.width)
-      pdf.save(`Relatorio_OS_${ordem.numero_os}.pdf`)
+      pdf.save(`OS_${ordem.id}.pdf`)
       document.body.removeChild(container)
-    } catch (e) { alert("Erro ao gerar PDF profissional.") } finally { setGerandoPDF(false) }
+    } catch (e) { alert("Erro PDF") } finally { setGerandoPDF(false) }
   }
 
   async function handleAddFoto(e: any) {
-    if (!e.target.files?.[0] || !ordem) return
+    if (!e.target.files?.[0]) return
     setSubindoFoto(true)
     const file = e.target.files[0]
     const path = `${ordem.id}/${Date.now()}-${file.name}`
@@ -198,82 +165,60 @@ export default function DetalhesOSPage() {
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">{ordem?.status}</span>
         </div>
         <div className="flex gap-2">
-          <button onClick={gerarPDF} disabled={gerandoPDF} className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
-            {gerandoPDF ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-          </button>
-          <button onClick={() => setModalEdicao(true)} className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500">
-            <Pencil size={18} />
-          </button>
+          <button onClick={gerarPDF} className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white"><Download size={18} /></button>
+          <button onClick={() => setModalEdicao(true)} className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500"><Pencil size={18} /></button>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-5 pt-8">
         
-        {/* CARD PRINCIPAL */}
+        {/* CARD INFORMAÇÕES */}
         <div className={`rounded-[32px] p-6 mb-6 border ${clean ? 'bg-white border-slate-100 shadow-sm' : 'bg-[#0d1726] border-slate-800'}`}>
           <div className="grid grid-cols-2 gap-6">
             <InfoBox label="Cliente" value={ordem?.cliente} clean={clean} Icon={User} />
             <InfoBox label="Máquina" value={ordem?.maquina} clean={clean} Icon={Monitor} />
-            <InfoBox label="Solicitante" value={ordem?.solicitante || '-'} clean={clean} Icon={Users} />
-            <InfoBox label="Responsável" value={ordem?.usuario_responsavel || 'Aguardando'} clean={clean} Icon={User} />
             <div className="col-span-2 pt-2">
-              <p className="text-[10px] font-black uppercase text-blue-500 mb-2">Descrição</p>
+              <p className="text-[10px] font-black uppercase text-blue-500 mb-2 tracking-widest">Descrição Inicial</p>
               <p className="text-xs font-medium opacity-70 leading-relaxed">{ordem?.descricao}</p>
             </div>
           </div>
         </div>
 
-        {/* CONTROLES DE STATUS */}
+        {/* STATUS CONTROLS - CINZA POR PADRÃO */}
         <div className="grid grid-cols-2 gap-3 mb-4">
             <button 
               onClick={() => { setMostrarCampoAndamento(true); setMostrarCampoParada(false); }}
-              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all shadow-lg ${ordem?.status === 'Em Andamento' ? 'bg-blue-600 text-white shadow-blue-600/20' : 'bg-slate-500/20 text-slate-500 shadow-none'}`}
+              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all ${ordem?.status === 'Em Andamento' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-slate-500/20 text-slate-500'}`}
             >
               <PlayCircle size={18} /> Em Andamento
             </button>
             <button 
               onClick={() => { setMostrarCampoParada(true); setMostrarCampoAndamento(false); }}
-              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all shadow-lg ${ordem?.status === 'Parado' ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-slate-500/20 text-slate-500 shadow-none'}`}
+              className={`flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-[10px] uppercase transition-all ${ordem?.status === 'Parado' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-500/20 text-slate-500'}`}
             >
               <PauseCircle size={18} /> Parar Serviço
             </button>
         </div>
 
-        {/* INPUTS DE STATUS (ABRE FORMULÁRIO) */}
+        {/* FORMULÁRIO DINÂMICO DE STATUS */}
         {mostrarCampoAndamento && (
           <div className={`mb-6 p-5 rounded-3xl border-2 border-blue-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-            <p className="text-[10px] font-black uppercase text-blue-500 mb-3 italic">Relatar Atividade</p>
-            <input 
-              value={tecnicoAtuante} 
-              onChange={(e) => setTecnicoAtuante(e.target.value)} 
-              className={`w-full p-4 rounded-xl text-xs mb-2 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`} 
-              placeholder="Nome do Técnico" 
-            />
-            <textarea 
-              value={atividadeExecutada} 
-              onChange={(e) => setAtividadeExecutada(e.target.value)} 
-              className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`} 
-              placeholder="O que está sendo executado?" 
-            />
-            <button onClick={() => alterarStatus('Em Andamento', atividadeExecutada)} className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase">Registrar Início</button>
+            <input value={tecnicoAtuante} onChange={e => setTecnicoAtuante(e.target.value)} className="w-full p-4 rounded-xl text-xs mb-2 bg-black/20 border border-white/10" placeholder="Nome do Técnico" />
+            <textarea value={atividadeExecutada} onChange={e => setAtividadeExecutada(e.target.value)} className="w-full p-4 rounded-xl text-xs mb-3 bg-black/20 border border-white/10" placeholder="Atividade realizada..." />
+            <button onClick={() => alterarStatus('Em Andamento', atividadeExecutada)} className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase">Confirmar Andamento</button>
           </div>
         )}
+
         {mostrarCampoParada && (
           <div className={`mb-6 p-5 rounded-3xl border-2 border-amber-500/30 ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}>
-            <p className="text-[10px] font-black uppercase text-amber-500 mb-3 italic">Motivo da Pausa</p>
-            <textarea 
-              value={motivoParada} 
-              onChange={(e) => setMotivoParada(e.target.value)} 
-              className={`w-full p-4 rounded-xl text-xs mb-3 border ${clean ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-700'}`} 
-              placeholder="Ex: Aguardando peça, fim do expediente..." 
-            />
-            <button onClick={() => alterarStatus('Parado', motivoParada)} className="w-full py-3 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase">Registrar Parada</button>
+            <textarea value={motivoParada} onChange={e => setMotivoParada(e.target.value)} className="w-full p-4 rounded-xl text-xs mb-3 bg-black/20 border border-white/10" placeholder="Motivo da pausa..." />
+            <button onClick={() => alterarStatus('Parado', motivoParada)} className="w-full py-3 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase">Confirmar Parada</button>
           </div>
         )}
 
         {/* GALERIA */}
         <div className={`rounded-[32px] p-6 mb-6 border ${clean ? 'bg-white border-slate-100' : 'bg-[#0d1726] border-slate-800'}`}>
-          <h2 className="text-[10px] font-black uppercase text-blue-500 mb-4">Fotos de Campo</h2>
+          <h2 className="text-[10px] font-black uppercase text-blue-500 mb-4 tracking-tighter">Fotos de Campo</h2>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <label className="flex flex-col items-center justify-center gap-2 p-4 bg-blue-600 rounded-2xl cursor-pointer text-white">
               <Camera size={20} /><span className="text-[9px] font-black uppercase">Câmera</span>
@@ -284,60 +229,64 @@ export default function DetalhesOSPage() {
               <input type="file" hidden accept="image/*" onChange={handleAddFoto} />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {fotos.map(f => <img key={f.id} src={f.url} className="w-full h-32 object-cover rounded-2xl" />)}
+          <div className="grid grid-cols-3 gap-2">
+            {fotos.map(f => <img key={f.id} src={f.url} className="w-full h-20 object-cover rounded-xl" />)}
           </div>
         </div>
 
-        {/* BOTÃO MATERIAL */}
-        <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="w-full py-5 mb-6 rounded-[32px] border-2 border-dashed border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest">+ Adicionar Materiais / Peças</button>
+        {/* PEÇAS E MATERIAIS - ACIMA DO HISTÓRICO */}
+        <button 
+            onClick={() => router.push(`/ordens/${id_os}/material`)} 
+            className="w-full py-5 mb-6 rounded-[32px] border-2 border-dashed border-blue-500/30 text-blue-500 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+        >
+          + Adicionar Peças / Materiais
+        </button>
 
         {/* HISTÓRICO COM CORES NAS BOLINHAS */}
         <div className={`rounded-[32px] p-6 mb-6 border ${clean ? 'bg-white border-slate-100' : 'bg-[#0d1726] border-slate-800'}`}>
-          <h2 className="text-[10px] font-black uppercase text-purple-500 mb-6 italic">Linha do Tempo</h2>
+          <h2 className="text-[10px] font-black uppercase text-purple-500 mb-6 italic tracking-widest">Linha do Tempo</h2>
           <div className="space-y-6">
-            {atualizacoes.map((at) => (
-              <div key={at.id} className={`relative pl-6 border-l-2 ${at.tipo_status === 'Parado' ? 'border-amber-500/20' : 'border-blue-500/20'}`}>
-                {/* Bolinha com cor dinâmica */}
-                <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#07111f] border-2 ${at.tipo_status === 'Parado' ? 'border-amber-500' : 'border-blue-500'}`} />
-                
-                <p className="text-[10px] font-black uppercase opacity-40 mb-1">{new Date(at.created_at).toLocaleString()}</p>
-                <p className={`text-xs font-black mb-1 ${at.tipo_status === 'Parado' ? 'text-amber-500' : 'text-blue-400'}`}>{at.usuario_nome}</p>
-                <p className="text-xs opacity-70 leading-relaxed italic">"{at.descricao}"</p>
-              </div>
-            ))}
+            {atualizacoes.map((at) => {
+              const isParado = at.tipo_status === 'Parado';
+              return (
+                <div key={at.id} className={`relative pl-6 border-l-2 ${isParado ? 'border-amber-500/20' : 'border-blue-500/20'}`}>
+                  <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#07111f] border-2 ${isParado ? 'border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'}`} />
+                  <p className="text-[9px] font-black uppercase opacity-40 mb-1">{new Date(at.created_at).toLocaleString()}</p>
+                  <p className="text-xs opacity-80 leading-relaxed font-medium italic">"{at.descricao}"</p>
+                </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* BOTÕES DE FINALIZAÇÃO E CANCELAMENTO (ABAIXO DO HISTÓRICO) */}
+        {/* AÇÕES FINAIS - NO FUNDO DA PÁGINA */}
         <div className="grid grid-cols-2 gap-3 mb-10">
-            <button onClick={finalizarOS} className="flex items-center justify-center gap-2 py-5 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-3xl font-black text-[10px] uppercase shadow-lg shadow-emerald-500/5">
-              <CheckCircle size={20} /> Finalizar OS
+            <button onClick={finalizarOS} className="flex items-center justify-center gap-2 py-5 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-3xl font-black text-[10px] uppercase">
+              <CheckCircle size={18} /> Finalizar OS
             </button>
-            <button onClick={cancelarOS} className="flex items-center justify-center gap-2 py-5 bg-red-600/10 text-red-500 border border-red-500/20 rounded-3xl font-black text-[10px] uppercase shadow-lg shadow-red-500/5">
-              <Trash2 size={20} /> Cancelar OS
+            <button onClick={cancelarOS} className="flex items-center justify-center gap-2 py-5 bg-red-600/10 text-red-500 border border-red-500/20 rounded-3xl font-black text-[10px] uppercase">
+              <Trash2 size={18} /> Cancelar OS
             </button>
         </div>
       </main>
 
       {/* MODAL EDIÇÃO */}
       {modalEdicao && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-          <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
-            <h2 className="text-lg font-black uppercase mb-6 italic tracking-tighter">Editar Informações</h2>
-            <div className="space-y-4">
-              <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className={`w-full p-4 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Cliente" />
-              <input value={editForm.solicitante} onChange={e => setEditForm({...editForm, solicitante: e.target.value})} className={`w-full p-4 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Solicitante" />
-              <input value={editForm.maquina} onChange={e => setEditForm({...editForm, maquina: e.target.value})} className={`w-full p-4 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Máquina" />
-              <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className={`w-full p-4 rounded-xl border min-h-[100px] ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Descrição do Problema" />
-              <button onClick={salvarEdicaoOS} disabled={salvandoEdicao} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg shadow-blue-600/20">{salvandoEdicao ? 'Salvando...' : 'Confirmar Alterações'}</button>
-              <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold uppercase opacity-50 pt-2">Voltar</button>
-            </div>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-6 text-white">
+          <div className="w-full max-w-sm bg-[#0d1726] p-8 rounded-[40px] border border-white/10">
+             <h2 className="text-lg font-black uppercase mb-6 italic">Editar OS</h2>
+             <div className="space-y-4">
+                <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className="w-full p-4 rounded-xl bg-black/40 border border-white/10" placeholder="Cliente" />
+                <input value={editForm.maquina} onChange={e => setEditForm({...editForm, maquina: e.target.value})} className="w-full p-4 rounded-xl bg-black/40 border border-white/10" placeholder="Máquina" />
+                <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className="w-full p-4 rounded-xl bg-black/40 border border-white/10 min-h-[100px]" placeholder="Descrição" />
+                <button onClick={salvarEdicaoOS} className="w-full py-4 bg-blue-600 rounded-2xl font-black uppercase">Salvar</button>
+                <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold opacity-50">Voltar</button>
+             </div>
           </div>
         </div>
       )}
 
-      {/* MENU INFERIOR RESTAURADO */}
+      {/* NAV INFERIOR RESTAURADA */}
       <footer className={`fixed bottom-0 left-0 right-0 border-t py-4 px-6 flex justify-around items-center z-40 ${clean ? 'bg-white/80 border-slate-200' : 'bg-[#07111f]/80 border-slate-800'} backdrop-blur-xl`}>
         <NavItem Icon={LayoutGrid} label="Início" onClick={() => router.push('/dashboard')} />
         <NavItem Icon={ClipboardList} label="Ordens" active onClick={() => router.push('/ordens')} />
@@ -346,11 +295,20 @@ export default function DetalhesOSPage() {
       </footer>
     </div>
   )
+
+  async function salvarEdicaoOS() {
+    setSalvandoEdicao(true)
+    await supabase.from('ordens_servico').update({...editForm}).eq('id', ordem.id)
+    setModalEdicao(false)
+    carregarDados()
+    setSalvandoEdicao(false)
+  }
 }
 
+// COMPONENTES AUXILIARES
 function NavItem({ Icon, label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-blue-500 scale-105' : 'text-slate-500'}`}>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-blue-500 scale-110' : 'text-slate-500'}`}>
       <Icon size={20} strokeWidth={active ? 3 : 2} />
       <span className="text-[9px] font-black uppercase tracking-tighter">{label}</span>
     </button>
