@@ -90,8 +90,8 @@ export default function DetalhesOSPage() {
 
   async function carregarDados() {
     const id = Number(id_os)
-    const { data: osData } = await supabase.from('ordens_servico').select('*').eq('id', id).single()
-    if (!osData) return setCarregando(false)
+    const { data: osData, error: osError } = await supabase.from('ordens_servico').select('*').eq('id', id).single()
+    if (osError || !osData) return setCarregando(false)
     
     setOrdem(osData)
     setEditForm({
@@ -117,13 +117,15 @@ export default function DetalhesOSPage() {
     if (!printRef.current) return
     setGerandoPDF(true)
     
-    // Pequeno delay para garantir que o DOM está estável
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // 1. Aguarda um pouco para garantir renderização
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
       const element = printRef.current
       
-      // Definição manual de cores hexadecimais para evitar erro de OKLCH
+      // 2. SOLUÇÃO PARA OKLCH:
+      // Clonamos o elemento e removemos cores problemáticas do clone
+      // Ou injetamos um estilo que sobrescreve as variáveis do Tailwind que usam oklch
       const bgColor = clean ? '#f8fafc' : '#07111f'
 
       const canvas = await html2canvas(element, {
@@ -132,6 +134,14 @@ export default function DetalhesOSPage() {
         allowTaint: true,
         logging: false,
         backgroundColor: bgColor,
+        // Função para garantir que não processe cores oklch em variáveis CSS
+        onclone: (clonedDoc) => {
+            const el = clonedDoc.body;
+            // Remove variáveis CSS que costumam conter oklch no Tailwind v4
+            el.style.setProperty('--tw-shadow-color', 'rgba(0,0,0,0)');
+            el.style.setProperty('--tw-ring-color', 'rgba(0,0,0,0)');
+            el.style.setProperty('--tw-outline-color', 'rgba(0,0,0,0)');
+        },
         ignoreElements: (el) => el.classList.contains('no-print')
       })
 
@@ -144,7 +154,7 @@ export default function DetalhesOSPage() {
       pdf.save(`OS_${ordem?.numero_os || id_os}.pdf`)
     } catch (error) {
       console.error('Erro detalhado:', error)
-      alert("Erro ao gerar PDF. Verifique o console para mais detalhes.")
+      alert("Erro ao gerar PDF. Tente atualizar a página.")
     } finally {
       setGerandoPDF(false)
     }
@@ -223,7 +233,6 @@ export default function DetalhesOSPage() {
       <div ref={printRef} className="pt-6">
         <main className="max-w-md mx-auto px-5">
           
-          {/* HEADER */}
           <div className="flex items-center justify-between gap-3 mb-6">
             <button onClick={() => router.push('/ordens')} className={`w-12 h-12 rounded-2xl flex items-center justify-center border no-print ${clean ? 'bg-white border-slate-200 text-slate-600' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
               <ChevronLeft size={24} />
@@ -240,7 +249,6 @@ export default function DetalhesOSPage() {
             </div>
           </div>
 
-          {/* CONTROLE DE OPERAÇÃO */}
           {!encerrada && (
             <section className={`no-print mb-6 p-4 rounded-3xl border ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-slate-800'}`}>
               <div className="flex gap-2">
@@ -272,7 +280,6 @@ export default function DetalhesOSPage() {
             </section>
           )}
 
-          {/* INFOS */}
           <div className={`rounded-3xl p-6 mb-5 border ${clean ? 'bg-white border-slate-100 shadow-sm' : 'bg-[#0d1726] border-slate-800'}`}>
             <div className="grid grid-cols-2 gap-y-6 gap-x-4">
               <InfoItem clean={clean} Icone={User} titulo="Cliente" texto={ordem?.cliente} />
@@ -283,7 +290,6 @@ export default function DetalhesOSPage() {
             </div>
           </div>
 
-          {/* FOTOS */}
           <div className={`rounded-3xl p-6 mb-5 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-[10px] font-black uppercase text-blue-500">Fotos de Campo</h2>
@@ -317,7 +323,6 @@ export default function DetalhesOSPage() {
             </div>
           </div>
 
-          {/* MATERIAIS */}
           <div className="mb-5">
             <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="no-print w-full py-4 mb-4 border-2 border-dashed border-blue-500/20 rounded-2xl text-blue-400 font-black uppercase text-[10px]">Adicionar Materiais</button>
             {materiais.length > 0 && (
@@ -332,7 +337,6 @@ export default function DetalhesOSPage() {
             )}
           </div>
 
-          {/* HISTÓRICO */}
           <div className={`rounded-3xl p-6 mb-10 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
             <h2 className="text-[10px] font-black uppercase mb-6 text-purple-500">Histórico</h2>
             <div className="space-y-5">
@@ -345,7 +349,6 @@ export default function DetalhesOSPage() {
             </div>
           </div>
 
-          {/* AÇÕES */}
           {!encerrada && (
             <div className="no-print grid grid-cols-2 gap-4 mb-10">
               <button onClick={() => alterarStatus('Cancelado')} className="p-4 rounded-3xl bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[10px] font-black uppercase flex flex-col items-center gap-2"><XCircle size={20}/> Cancelar</button>
@@ -355,7 +358,6 @@ export default function DetalhesOSPage() {
         </main>
       </div>
 
-      {/* MODAL VISUALIZAÇÃO DE FOTO */}
       {fotoExpandida && (
         <div className="fixed inset-0 bg-black/95 z-[110] flex items-center justify-center p-4" onClick={() => setFotoExpandida(null)}>
           <button className="absolute top-6 right-6 text-white bg-white/10 p-2 rounded-full"><X size={32}/></button>
@@ -363,7 +365,6 @@ export default function DetalhesOSPage() {
         </div>
       )}
 
-      {/* MENU INFERIOR */}
       <nav className={`no-print fixed bottom-0 left-0 right-0 border-t py-4 px-6 z-50 ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#07111f] border-slate-800 text-white'}`}>
         <div className="max-w-md mx-auto flex justify-between items-center">
             <MenuNav titulo="Home" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
@@ -373,7 +374,6 @@ export default function DetalhesOSPage() {
         </div>
       </nav>
 
-      {/* MODAL EDIÇÃO */}
       {modalEdicao && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
             <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
