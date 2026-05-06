@@ -7,7 +7,7 @@ import {
   ChevronLeft, ClipboardList, User, Monitor, 
   FileText, Camera, Users, LayoutGrid, 
   CircleDollarSign, Settings, CheckCircle2, XCircle, Loader2,
-  PlayCircle, PauseCircle, Pencil, Download, X, ImagePlus
+  PlayCircle, PauseCircle, Pencil, Download, X, ImagePlus, Clock
 } from 'lucide-react'
 
 import jsPDF from 'jspdf'
@@ -116,14 +116,10 @@ export default function DetalhesOSPage() {
   async function gerarPDF() {
     if (!printRef.current) return
     setGerandoPDF(true)
-    
-    // Pequeno delay para garantir que o DOM está estável
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
       const element = printRef.current
-      
-      // Definição manual de cores hexadecimais para evitar erro de OKLCH
       const bgColor = clean ? '#f8fafc' : '#07111f'
 
       const canvas = await html2canvas(element, {
@@ -143,8 +139,8 @@ export default function DetalhesOSPage() {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
       pdf.save(`OS_${ordem?.numero_os || id_os}.pdf`)
     } catch (error) {
-      console.error('Erro detalhado:', error)
-      alert("Erro ao gerar PDF. Verifique o console para mais detalhes.")
+      console.error('Erro:', error)
+      alert("Erro ao gerar PDF.")
     } finally {
       setGerandoPDF(false)
     }
@@ -322,7 +318,7 @@ export default function DetalhesOSPage() {
             <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="no-print w-full py-4 mb-4 border-2 border-dashed border-blue-500/20 rounded-2xl text-blue-400 font-black uppercase text-[10px]">Adicionar Materiais</button>
             {materiais.length > 0 && (
               <div className={`rounded-3xl p-6 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
-                <h2 className="text-[10px] font-black uppercase mb-4">Peças / Materiais</h2>
+                <h2 className="text-[10px] font-black uppercase mb-4 text-blue-500">Peças / Materiais</h2>
                 {materiais.map(m => (
                   <div key={m.id} className="mb-3 pb-3 border-b border-white/5 last:border-0">
                     <p className="text-xs font-bold uppercase">{m.descricao} <span className="text-blue-500 ml-1">x{m.quantidade}</span></p>
@@ -334,22 +330,41 @@ export default function DetalhesOSPage() {
 
           {/* HISTÓRICO */}
           <div className={`rounded-3xl p-6 mb-10 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
-            <h2 className="text-[10px] font-black uppercase mb-6 text-purple-500">Histórico</h2>
-            <div className="space-y-5">
-                {atualizacoes.map(at => (
-                  <div key={at.id} className="border-l-2 border-purple-500/30 pl-4">
-                    <p className="text-[9px] font-black uppercase opacity-40">{new Date(at.created_at).toLocaleDateString()} - {at.tecnicos_responsaveis || at.usuario_nome}</p>
-                    <p className="text-xs font-medium mt-1">{at.descricao}</p>
-                  </div>
-                ))}
+            <div className="flex items-center gap-2 mb-6">
+               <h2 className="text-[10px] font-black uppercase text-blue-500">Histórico de Serviço</h2>
+            </div>
+            <div className="space-y-6">
+                {atualizacoes.map(at => {
+                  const isIniciado = at.descricao.includes('INICIO:');
+                  const isParado = at.descricao.includes('PARADA:');
+                  
+                  return (
+                    <div key={at.id} className={`border-l-2 pl-4 transition-colors ${isIniciado ? 'border-blue-500' : isParado ? 'border-amber-500' : 'border-slate-500/30'}`}>
+                      <div className="flex items-center gap-2 opacity-40 mb-1">
+                        <Clock size={10} />
+                        <p className="text-[9px] font-black uppercase">{new Date(at.created_at).toLocaleDateString()} - {at.tecnicos_responsaveis || at.usuario_nome}</p>
+                      </div>
+                      <p className={`text-xs font-bold ${isIniciado ? 'text-blue-400' : isParado ? 'text-amber-400' : ''}`}>{at.descricao}</p>
+                    </div>
+                  )
+                })}
             </div>
           </div>
 
-          {/* AÇÕES */}
+          {/* AÇÕES - BOTÕES MODERNOS E MENORES */}
           {!encerrada && (
-            <div className="no-print grid grid-cols-2 gap-4 mb-10">
-              <button onClick={() => alterarStatus('Cancelado')} className="p-4 rounded-3xl bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[10px] font-black uppercase flex flex-col items-center gap-2"><XCircle size={20}/> Cancelar</button>
-              <button onClick={() => alterarStatus('Finalizado')} className="p-4 rounded-3xl bg-emerald-500 text-white text-[10px] font-black uppercase flex flex-col items-center gap-2"><CheckCircle2 size={20}/> Finalizar</button>
+            <div className="no-print flex gap-3 mb-10 h-14">
+              <button 
+                onClick={() => alterarStatus('Cancelado')} 
+                className={`flex-1 rounded-2xl border transition-all active:scale-95 flex items-center justify-center gap-2 text-[10px] font-black uppercase ${clean ? 'bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500/20'}`}>
+                <XCircle size={16}/> Cancelar
+              </button>
+              
+              <button 
+                onClick={() => alterarStatus('Finalizado')} 
+                className="flex-[1.5] rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 text-[10px] font-black uppercase hover:bg-emerald-600">
+                <CheckCircle2 size={16}/> Finalizar OS
+              </button>
             </div>
           )}
         </main>
@@ -377,12 +392,12 @@ export default function DetalhesOSPage() {
       {modalEdicao && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
             <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
-                <h2 className="text-lg font-black uppercase mb-6 italic">Editar OS</h2>
+                <h2 className="text-lg font-black uppercase mb-6 italic text-blue-500">Editar OS</h2>
                 <div className="space-y-4">
                     <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Cliente" />
                     <input value={editForm.maquina} onChange={e => setEditForm({...editForm, maquina: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Máquina" />
                     <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className={`w-full p-3 rounded-xl border min-h-[100px] ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Descrição" />
-                    <button onClick={salvarEdicaoOS} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase">{salvandoEdicao ? 'Salvando...' : 'Salvar'}</button>
+                    <button onClick={salvarEdicaoOS} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg shadow-blue-600/20">{salvandoEdicao ? 'Salvando...' : 'Salvar'}</button>
                     <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold uppercase mt-2 opacity-50">Fechar</button>
                 </div>
             </div>
