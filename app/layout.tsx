@@ -12,18 +12,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Pega o nome da empresa configurado na Vercel. Se não encontrar, usa "Sistema OS" como padrão.
-const nomeEmpresa = process.env.NEXT_PUBLIC_NOME_EMPRESA || "Sistema OS";
+// Nome fixo conforme solicitado
+const tituloApp = "R&B Torneadora - Sistema OS";
 
-// Configuração de Metadados Dinâmicos
+// Configuração de Metadados
 export const metadata: Metadata = {
-  title: `${nomeEmpresa} - Sistema OS`,
+  title: tituloApp, // Aqui define o texto exato da aba do navegador
   description: "Sistema de Gestão de Ordens de Serviço",
   manifest: "/manifest.json", 
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: nomeEmpresa, // Nome dinâmico para o atalho no iPhone
+    title: "R&B Torneadora", // Nome curto para o ícone no iPhone
   },
   formatDetection: {
     telephone: false,
@@ -51,6 +51,7 @@ export default function RootLayout({
     >
       <head>
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        {/* Removida a lógica de repetição que poderia estar vindo de outros lugares */}
       </head>
       <body className="min-h-full flex flex-col bg-[#07111f]"> 
         {children}
