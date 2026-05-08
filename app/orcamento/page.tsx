@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import {
   Plus, User, FileText, MapPin, Phone,
-  Wifi, WifiOff, X, Share2, Loader2, Camera, Image as ImageIcon, Hash, Edit3, Save, CircleDollarSign
+  Wifi, WifiOff, X, Share2, Loader2, Camera, Image as ImageIcon, Hash, Edit3, Save, CircleDollarSign, Trash2
 } from 'lucide-react'
 
 export default function OrcamentoPage() {
@@ -26,9 +26,9 @@ export default function OrcamentoPage() {
     descricao: '', 
     quantidade: '', 
     valor_unitario: '',
-    desconto: '0', 
+    desconto: '', 
     observacao: '', 
-    foto_preview: ''
+    fotos: [] as string[] // Alterado para Array de fotos
   })
 
   useEffect(() => {
@@ -42,19 +42,26 @@ export default function OrcamentoPage() {
     setCarregando(false)
   }
 
-  // FUNÇÃO PARA TRATAR A FOTO (CONVERTE PARA BASE64 PARA PREVIEW/SALVAMENTO SIMPLES)
   const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setForm({ ...form, foto_preview: reader.result as string })
-      }
-      reader.readAsDataURL(file)
+    const files = e.target.files
+    if (files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setForm(prev => ({ ...prev, fotos: [...prev.fotos, reader.result as string] }))
+        }
+        reader.readAsDataURL(file)
+      })
     }
   }
 
-  // FUNÇÃO PARA CARREGAR DADOS NO MODAL PARA EDIÇÃO
+  const removerFoto = (index: number) => {
+    setForm(prev => ({
+      ...prev,
+      fotos: prev.fotos.filter((_, i) => i !== index)
+    }))
+  }
+
   function abrirEdicao(orc: any) {
     setEditandoId(orc.id)
     setForm({
@@ -65,9 +72,9 @@ export default function OrcamentoPage() {
       descricao: orc.descricao_servico || '',
       quantidade: orc.quantidade?.toString() || '',
       valor_unitario: orc.valor_unitario?.toString() || '',
-      desconto: orc.desconto?.toString() || '0',
+      desconto: orc.desconto?.toString() || '',
       observacao: orc.observacao || '',
-      foto_preview: orc.foto_url || ''
+      fotos: Array.isArray(orc.foto_url) ? orc.foto_url : (orc.foto_url ? [orc.foto_url] : [])
     })
     setModalAberto(true)
   }
@@ -75,9 +82,9 @@ export default function OrcamentoPage() {
   async function salvarOrcamento() {
     if (!form.razao_social || !form.valor_unitario) return alert('Preencha Razão Social e Valor!')
     
-    const vUnit = parseFloat(form.valor_unitario) || 0
+    const vUnit = parseFloat(form.valor_unitario.replace(',', '.')) || 0
     const qtd = parseFloat(form.quantidade) || 0
-    const desc = parseFloat(form.desconto) || 0
+    const desc = parseFloat(form.desconto.replace(',', '.')) || 0
     const vTotal = (vUnit * qtd) - desc
 
     const dados = {
@@ -91,7 +98,7 @@ export default function OrcamentoPage() {
       valor_total: vTotal,
       desconto: desc,
       observacao: form.observacao,
-      foto_url: form.foto_preview
+      foto_url: form.fotos // Salva o array de strings
     }
 
     const { error } = editandoId 
@@ -112,7 +119,7 @@ export default function OrcamentoPage() {
     setForm({ 
       razao_social: '', solicitante: '', documento: '', telefone: '',
       descricao: '', quantidade: '', valor_unitario: '',
-      desconto: '0', observacao: '', foto_preview: ''
+      desconto: '', observacao: '', fotos: []
     })
   }
 
@@ -137,11 +144,10 @@ export default function OrcamentoPage() {
                   <p className="font-bold uppercase text-xs truncate w-32">{orc.cliente}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* BOTÃO DE EDIÇÃO NO CARD */}
                   <button onClick={() => abrirEdicao(orc)} className="p-2 bg-slate-800 rounded-lg text-slate-400 active:scale-90">
                     <Edit3 size={16} />
                   </button>
-                  <p className="text-sm font-black text-emerald-400 ml-2">R$ {orc.valor_total?.toFixed(2)}</p>
+                  <p className="text-sm font-black text-emerald-400 ml-2 font-mono">R$ {orc.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -158,41 +164,25 @@ export default function OrcamentoPage() {
             </div>
 
             <div className="space-y-4 pb-10">
-              
-              {/* SEÇÃO DE FOTO */}
+              {/* SEÇÃO DE MÚLTIPLAS FOTOS */}
               <div className="space-y-3">
-                <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Imagem do Serviço</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Imagens do Serviço ({form.fotos.length})</p>
                 <div className="flex gap-3">
-                  {/* Botão Galeria */}
-                  <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"
-                  >
-                    <ImageIcon size={16} /> Galeria
-                  </button>
-                  {/* Botão Câmera */}
-                  <button 
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"
-                  >
-                    <Camera size={16} /> Câmera
-                  </button>
+                  <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"><ImageIcon size={16} /> Galeria</button>
+                  <button onClick={() => cameraInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"><Camera size={16} /> Câmera</button>
                 </div>
                 
-                {/* Inputs Escondidos */}
-                <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFoto} />
+                <input type="file" accept="image/*" multiple ref={fileInputRef} className="hidden" onChange={handleFoto} />
                 <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} className="hidden" onChange={handleFoto} />
 
-                {/* Preview da Foto */}
-                {form.foto_preview && (
-                  <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-slate-700">
-                    <img src={form.foto_preview} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
-                      onClick={() => setForm({...form, foto_preview: ''})}
-                      className="absolute top-2 right-2 bg-red-500 p-1 rounded-full text-white"
-                    >
-                      <X size={14} />
-                    </button>
+                {form.fotos.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {form.fotos.map((foto, index) => (
+                      <div key={index} className="relative min-w-30 h-24 rounded-xl overflow-hidden border border-slate-700">
+                        <img src={foto} className="w-full h-full object-cover" />
+                        <button onClick={() => removerFoto(index)} className="absolute top-1 right-1 bg-red-500 p-1 rounded-full text-white shadow-lg"><Trash2 size={10} /></button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -207,23 +197,13 @@ export default function OrcamentoPage() {
 
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Dados do Serviço</p>
-                <textarea 
-                  className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-20 outline-none text-white focus:border-blue-500"
-                  placeholder="Descrição do Serviço"
-                  value={form.descricao}
-                  onChange={e => setForm({...form, descricao: e.target.value})}
-                />
+                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-20 outline-none text-white focus:border-blue-500" placeholder="Descrição do Serviço" value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} />
                 <div className="grid grid-cols-2 gap-3">
                   <InputIcon Icone={Hash} placeholder="Quantidade" value={form.quantidade} onChange={(v) => setForm({...form, quantidade: v})} />
-                  <InputIcon Icone={CircleDollarSign} placeholder="Valor Unitário" value={form.valor_unitario} onChange={(v) => setForm({...form, valor_unitario: v})} />
+                  <InputMoeda Icone={CircleDollarSign} placeholder="Unitário" value={form.valor_unitario} onChange={(v) => setForm({...form, valor_unitario: v})} />
                 </div>
-                <InputIcon Icone={CircleDollarSign} placeholder="Desconto (R$)" value={form.desconto} onChange={(v) => setForm({...form, desconto: v})} />
-                <textarea 
-                  className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-16 outline-none text-white focus:border-blue-500"
-                  placeholder="Observações Adicionais"
-                  value={form.observacao}
-                  onChange={e => setForm({...form, observacao: e.target.value})}
-                />
+                <InputMoeda Icone={CircleDollarSign} placeholder="Desconto" value={form.desconto} onChange={(v) => setForm({...form, desconto: v})} />
+                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-16 outline-none text-white focus:border-blue-500" placeholder="Observações Adicionais" value={form.observacao} onChange={e => setForm({...form, observacao: e.target.value})} />
               </div>
 
               <button onClick={salvarOrcamento} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
@@ -238,16 +218,28 @@ export default function OrcamentoPage() {
   )
 }
 
+// INPUT PARA MOEDA (R$)
+function InputMoeda({ Icone, placeholder, value, onChange }: { Icone: any, placeholder: string, value: string, onChange: (v: string) => void }) {
+  return (
+    <div className="relative">
+      <Icone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+      <span className="absolute left-8 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500">R$</span>
+      <input 
+        className="w-full bg-slate-900 border border-slate-700 py-3 pl-14 pr-3 rounded-xl text-xs outline-none text-white focus:border-blue-500 font-mono"
+        placeholder={placeholder}
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value.replace(/[^0-9,.]/g, ''))}
+      />
+    </div>
+  )
+}
+
 function InputIcon({ Icone, placeholder, value, onChange }: { Icone: any, placeholder: string, value: string, onChange: (v: string) => void }) {
   return (
     <div className="relative">
       <Icone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-      <input 
-        className="w-full bg-slate-900 border border-slate-700 py-3 pl-10 pr-3 rounded-xl text-xs outline-none text-white focus:border-blue-500"
-        placeholder={placeholder}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-      />
+      <input className="w-full bg-slate-900 border border-slate-700 py-3 pl-10 pr-3 rounded-xl text-xs outline-none text-white focus:border-blue-500" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
     </div>
   )
 }
