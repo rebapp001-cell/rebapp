@@ -351,7 +351,7 @@ export default function DetalhesOSPage() {
             </div>
           </div>
 
-          {/* AÇÕES - BOTÕES MODERNOS E MENORES */}
+          {/* AÇÕES */}
           {!encerrada && (
             <div className="no-print flex gap-3 mb-10 h-14">
               <button 
@@ -372,31 +372,34 @@ export default function DetalhesOSPage() {
 
       {/* MODAL VISUALIZAÇÃO DE FOTO */}
       {fotoExpandida && (
-        <div className="fixed inset-0 bg-black/95 z-[110] flex items-center justify-center p-4" onClick={() => setFotoExpandida(null)}>
+        <div className="fixed inset-0 bg-black/95 z-110 flex items-center justify-center p-4" onClick={() => setFotoExpandida(null)}>
           <button className="absolute top-6 right-6 text-white bg-white/10 p-2 rounded-full"><X size={32}/></button>
           <img src={fotoExpandida} className="max-w-full max-h-full rounded-lg shadow-2xl" />
         </div>
       )}
 
-      {/* MENU INFERIOR */}
-      <nav className={`no-print fixed bottom-0 left-0 right-0 border-t py-4 px-6 z-50 ${clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#07111f] border-slate-800 text-white'}`}>
-        <div className="max-w-md mx-auto flex justify-between items-center">
-            <MenuNav titulo="Home" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
-            <MenuNav ativo titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
-            <MenuNav titulo="Faturas" Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
-            <MenuNav titulo="Ajustes" Icone={Settings} onClick={() => router.push('/configuracao')} />
+      {/* MENU INFERIOR PADRONIZADO (5 COLUNAS) */}
+      <nav className={`no-print fixed bottom-0 left-0 right-0 border-t py-2 z-50 ${
+        clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'
+      }`}>
+        <div className="max-w-md mx-auto grid grid-cols-5 px-2">
+          <MenuNav clean={clean} titulo="Início" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
+          <MenuNav clean={clean} ativo titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
+          <MenuNav clean={clean} titulo="Orçam." Icone={FileText} onClick={() => router.push('/orcamento')} />
+          <MenuNav clean={clean} titulo="Faturam." Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
+          <MenuNav clean={clean} titulo="Config." Icone={Settings} onClick={() => router.push('/configuracao')} />
         </div>
       </nav>
 
       {/* MODAL EDIÇÃO */}
       {modalEdicao && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-            <div className={`w-full max-w-sm rounded-[32px] p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-100 flex items-center justify-center p-6">
+            <div className={`w-full max-w-sm rounded-4xl p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
                 <h2 className="text-lg font-black uppercase mb-6 italic text-blue-500">Editar OS</h2>
                 <div className="space-y-4">
                     <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Cliente" />
                     <input value={editForm.maquina} onChange={e => setEditForm({...editForm, maquina: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Máquina" />
-                    <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className={`w-full p-3 rounded-xl border min-h-[100px] ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Descrição" />
+                    <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className={`w-full p-3 rounded-xl border min-h-25 ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Descrição" />
                     <button onClick={salvarEdicaoOS} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg shadow-blue-600/20">{salvandoEdicao ? 'Salvando...' : 'Salvar'}</button>
                     <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold uppercase mt-2 opacity-50">Fechar</button>
                 </div>
@@ -419,10 +422,16 @@ function InfoItem({ Icone, titulo, texto, full, clean }: any) {
   )
 }
 
-function MenuNav({ titulo, Icone, ativo, onClick }: any) {
+function MenuNav({ titulo, Icone, ativo, onClick, clean }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 min-w-[60px] transition-colors ${ativo ? 'text-blue-500' : 'text-slate-500'}`}>
-      <Icone size={20}/><span className="text-[9px] font-black uppercase">{titulo}</span>
+    <button 
+      onClick={onClick} 
+      className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
+        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+      }`}
+    >
+      <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
+      <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
     </button>
   )
 }
