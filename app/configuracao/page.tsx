@@ -15,34 +15,9 @@ import {
   CircleDollarSign, 
   Settings,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  FileText // Importado para o menu
 } from 'lucide-react'
-
-function MenuItem({
-  titulo,
-  Icone,
-  ativo = false,
-  clean,
-  onClick,
-}: {
-  titulo: string
-  Icone: any
-  ativo?: boolean
-  clean: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center py-2 transition-all ${
-        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
-      }`}
-    >
-      <Icone size={24} strokeWidth={ativo ? 2.5 : 2} />
-      <span className="mt-1 text-[10px] font-medium">{titulo}</span>
-    </button>
-  )
-}
 
 export default function ConfiguracaoPage() {
   const router = useRouter()
@@ -140,7 +115,7 @@ export default function ConfiguracaoPage() {
             </button>
           </div>
 
-          {/* DICAS DE SENHA (O quadro azul da imagem) */}
+          {/* DICAS DE SENHA */}
           <div className={`mt-6 p-4 rounded-2xl border ${
             clean ? 'bg-blue-50 border-blue-100' : 'bg-blue-500/5 border-blue-500/20'
           }`}>
@@ -160,18 +135,34 @@ export default function ConfiguracaoPage() {
         </section>
       </main>
 
-      {/* MENU INFERIOR FIXO */}
+      {/* MENU INFERIOR PADRONIZADO (5 COLUNAS) */}
       <nav className={`fixed bottom-0 left-0 right-0 border-t py-2 z-50 ${
         clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'
       }`}>
-        <div className="max-w-md mx-auto grid grid-cols-4 px-4">
-          <MenuItem clean={clean} titulo="Dashboard" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
+        <div className="max-w-md mx-auto grid grid-cols-5 px-2">
+          <MenuItem clean={clean} titulo="Início" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
           <MenuItem clean={clean} titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
+          <MenuItem clean={clean} titulo="Orçam." Icone={FileText} onClick={() => router.push('/orcamento')} />
           <MenuItem clean={clean} titulo="Faturam." Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
           <MenuItem clean={clean} ativo titulo="Config." Icone={Settings} onClick={() => {}} />
         </div>
       </nav>
     </div>
+  )
+}
+
+// Subcomponente para os itens do Menu Inferior
+function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
+  return (
+    <button 
+      onClick={onClick} 
+      className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
+        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+      }`}
+    >
+      <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
+      <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
+    </button>
   )
 }
 
@@ -193,7 +184,7 @@ function ThemeCard({ active, label, sub, Icon, onClick, clean }: any) {
   )
 }
 
-// Subcomponente para Inputs com ícone e olho
+// Subcomponente para Inputs de Senha
 function InputSenha({ placeholder, visible, toggleVisible, clean }: any) {
   return (
     <div className="relative group">
