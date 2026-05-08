@@ -203,7 +203,7 @@ export default function NovaOSPage() {
                   placeholder="Descreva o problema ou serviço..."
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm font-bold resize-none min-h-[100px] placeholder:text-slate-600"
+                  className="w-full bg-transparent outline-none text-sm font-bold resize-none min-h-25 placeholder:text-slate-600"
                 />
               </div>
             </div>

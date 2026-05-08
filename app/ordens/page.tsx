@@ -124,7 +124,7 @@ export default function OrdensPage() {
           />
         </div>
 
-        {/* FILTROS POR STATUS (CARROSSEL) */}
+        {/* FILTROS POR STATUS */}
         <div className="flex gap-2 overflow-x-auto pb-6 no-scrollbar">
           <BotaoFiltro label="Todos" ativo={filtroStatus === 'todos'} onClick={() => setFiltroStatus('todos')} clean={clean} />
           <BotaoFiltro label="Em andamento" ativo={filtroStatus === 'Em andamento'} onClick={() => setFiltroStatus('Em andamento')} clean={clean} />
@@ -162,7 +162,7 @@ export default function OrdensPage() {
               <div className="py-10 text-center animate-pulse text-slate-500">Carregando...</div>
             ) : ordensFiltradas.length === 0 ? (
               <div className="py-10 text-center text-slate-500 text-sm italic">
-                Nenhuma OS encontrada para este filtro.
+                Nenhuma OS encontrada.
               </div>
             ) : (
               ordensFiltradas.map((ordem) => (
@@ -213,13 +213,14 @@ export default function OrdensPage() {
         </section>
       </main>
 
-      {/* MENU INFERIOR */}
+      {/* MENU INFERIOR PADRONIZADO (5 COLUNAS) */}
       <nav className={`fixed bottom-0 left-0 right-0 border-t py-2 z-50 ${
         clean ? 'bg-white border-slate-200' : 'bg-[#07111f] border-slate-800'
       }`}>
-        <div className="max-w-md mx-auto grid grid-cols-4 px-4">
+        <div className="max-w-md mx-auto grid grid-cols-5 px-2">
           <MenuItem clean={clean} titulo="Início" Icone={LayoutGrid} onClick={() => router.push('/dashboard')} />
           <MenuItem clean={clean} ativo titulo="Ordens" Icone={ClipboardList} onClick={() => {}} />
+          <MenuItem clean={clean} titulo="Orçam." Icone={FileText} onClick={() => router.push('/orcamento')} />
           <MenuItem clean={clean} titulo="Faturam." Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
           <MenuItem clean={clean} titulo="Config." Icone={Settings} onClick={() => router.push('/configuracao')} />
         </div>
@@ -228,7 +229,7 @@ export default function OrdensPage() {
   )
 }
 
-// COMPONENTE DE FILTRO (PILLS)
+// COMPONENTES AUXILIARES
 function BotaoFiltro({ label, ativo, onClick, clean }: any) {
   return (
     <button
@@ -259,11 +260,14 @@ function InfoLinha({ titulo, texto, clean }: any) {
 
 function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center py-2 ${
-      ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
-    }`}>
-      <Icone size={24} strokeWidth={ativo ? 2.5 : 2} />
-      <span className="mt-1 text-[10px] font-medium">{titulo}</span>
+    <button 
+      onClick={onClick} 
+      className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
+        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+      }`}
+    >
+      <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
+      <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
     </button>
   )
 }
