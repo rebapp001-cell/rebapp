@@ -93,7 +93,7 @@ export default function LoginPage() {
         
         {/* LOGO AREA */}
         <div className="flex justify-center mb-10">
-          <div className="relative w-[260px] h-[100px]">
+          <div className="relative w-65 h-25">
             <Image
               src="/logo-divisa.png"
               alt="Logo Divisa"
