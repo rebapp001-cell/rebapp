@@ -12,18 +12,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Nome fixo conforme solicitado
-const tituloApp = "R&B Torneadora - Sistema OS";
-
-// Configuração de Metadados
+// Configuração de Metadados - Título fixo para evitar duplicação
 export const metadata: Metadata = {
-  title: tituloApp, // Aqui define o texto exato da aba do navegador
+  title: "R&B Torneadora - Sistema OS",
   description: "Sistema de Gestão de Ordens de Serviço",
   manifest: "/manifest.json", 
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "R&B Torneadora", // Nome curto para o ícone no iPhone
+    title: "R&B Torneadora", // Nome para o ícone de atalho no celular
   },
   formatDetection: {
     telephone: false,
@@ -51,7 +48,6 @@ export default function RootLayout({
     >
       <head>
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        {/* Removida a lógica de repetição que poderia estar vindo de outros lugares */}
       </head>
       <body className="min-h-full flex flex-col bg-[#07111f]"> 
         {children}
