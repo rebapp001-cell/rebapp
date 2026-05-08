@@ -26,6 +26,9 @@ export default function LoginPage() {
   const [tema, setTema] = useState<'dark' | 'clean'>('dark')
 
   useEffect(() => {
+    // Garante que o título da página seja aplicado corretamente ao carregar
+    document.title = "R&B Torneadora - Sistema OS"
+    
     const temaSalvo = localStorage.getItem('tema-app') as 'dark' | 'clean' | null
     if (temaSalvo) setTema(temaSalvo)
   }, [])
@@ -43,13 +46,12 @@ export default function LoginPage() {
 
     setCarregando(true)
 
-    // Ajuste: .trim() remove espaços e garante que a busca no Supabase ignore erros de digitação
     const { data, error } = await supabase
       .from('usuarios')
       .select('*')
       .eq('usuario', usuario.trim())
       .eq('senha', senha.trim())
-      .maybeSingle() // Ajuste: maybeSingle resolve o erro 406 do console
+      .maybeSingle()
 
     if (error) {
       console.error("Erro Supabase:", error.message)
@@ -93,10 +95,10 @@ export default function LoginPage() {
         
         {/* LOGO AREA */}
         <div className="flex justify-center mb-10">
-          <div className="relative w-65 h-25">
+          <div className="relative w-64 h-24">
             <Image
-              src="/logo-divisa.png"
-              alt="Logo Divisa"
+              src="/logo-divisa.png" // Lembre-se de trocar o arquivo da logo na pasta public quando puder
+              alt="Logo R&B Torneadora"
               fill
               className={`object-contain transition-all ${tema === 'clean' ? 'brightness-0 opacity-80' : ''}`}
               priority
@@ -124,7 +126,6 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-5 mb-8">
-            {/* INPUT USUÁRIO - Agora força o estado para Maiúsculo */}
             <div>
               <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block px-2 tracking-widest">Usuário</label>
               <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-blue-500 transition-all ${
@@ -143,7 +144,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* INPUT SENHA - Agora força o estado para Maiúsculo */}
             <div>
               <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block px-2 tracking-widest">Senha</label>
               <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-blue-500 transition-all ${
