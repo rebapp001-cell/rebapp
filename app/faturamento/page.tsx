@@ -144,7 +144,7 @@ export default function FaturamentoPage() {
               key={ordem.id}
               // CORREÇÃO DA ROTA: Agora aponta para /ordens/[id]
               onClick={() => router.push(`/ordens/${ordem.id}`)}
-              className={`rounded-[2rem] border p-6 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${ordem.status_faturamento === 'Faturado'
+              className={`rounded-4xl border p-6 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${ordem.status_faturamento === 'Faturado'
                   ? 'border-emerald-500/30 bg-emerald-500/5'
                   : clean ? 'bg-white border-slate-200 shadow-sm' : 'bg-[#0b1628] border-slate-800'
                 }`}
@@ -202,7 +202,7 @@ export default function FaturamentoPage() {
 
       {/* MODAL DE GERENCIAMENTO */}
       {modalAberto && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setModalAberto(false)}>
+        <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setModalAberto(false)}>
           <div
             onClick={e => e.stopPropagation()}
             className={`w-full max-w-sm rounded-[2.5rem] p-8 max-h-[90vh] overflow-y-auto ${clean ? 'bg-white' : 'bg-[#0d1726]'}`}

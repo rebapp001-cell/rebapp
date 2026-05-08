@@ -131,7 +131,7 @@ export default function DashboardPage() {
         </div>
 
         {/* PERFIL E ATALHOS */}
-        <div className={`rounded-3xl p-6 mb-6 shadow-2xl border ${clean ? 'bg-white border-slate-100' : 'bg-gradient-to-br from-[#111d31] to-[#0a1220] border-blue-500/20'
+        <div className={`rounded-3xl p-6 mb-6 shadow-2xl border ${clean ? 'bg-white border-slate-100' : 'bg-linear-to-br from-[#111d31] to-[#0a1220] border-blue-500/20'
           }`}>
           <div className="flex items-center justify-between mb-8">
             <div className="min-w-0">
