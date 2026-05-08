@@ -4,27 +4,27 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import {
-  Plus, User, Monitor, FileText, MapPin, Phone,
-  Wifi, WifiOff, X, Share2, Loader2, Camera, Hash, Edit3, Save, CircleDollarSign
+  Plus, User, FileText, MapPin, Phone,
+  Wifi, WifiOff, X, Share2, Loader2, Camera, Image as ImageIcon, Hash, Edit3, Save, CircleDollarSign
 } from 'lucide-react'
 
 export default function OrcamentoPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   
   const [modalAberto, setModalAberto] = useState(false)
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [orcamentos, setOrcamentos] = useState<any[]>([])
   const [carregando, setCarregando] = useState(true)
 
-  // ESTADO DO FORMULÁRIO COM OS CAMPOS SOLICITADOS
   const [form, setForm] = useState({ 
     razao_social: '', 
     solicitante: '', 
     documento: '', 
     telefone: '',
     descricao: '', 
-    quantidade: '1', 
+    quantidade: '', 
     valor_unitario: '',
     desconto: '0', 
     observacao: '', 
@@ -42,15 +42,42 @@ export default function OrcamentoPage() {
     setCarregando(false)
   }
 
-  // FUNÇÃO PARA SALVAR COM CÁLCULO AUTOMÁTICO
+  // FUNÇÃO PARA TRATAR A FOTO (CONVERTE PARA BASE64 PARA PREVIEW/SALVAMENTO SIMPLES)
+  const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setForm({ ...form, foto_preview: reader.result as string })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // FUNÇÃO PARA CARREGAR DADOS NO MODAL PARA EDIÇÃO
+  function abrirEdicao(orc: any) {
+    setEditandoId(orc.id)
+    setForm({
+      razao_social: orc.cliente || '',
+      solicitante: orc.solicitante || '',
+      documento: orc.documento || '',
+      telefone: orc.telefone || '',
+      descricao: orc.descricao_servico || '',
+      quantidade: orc.quantidade?.toString() || '',
+      valor_unitario: orc.valor_unitario?.toString() || '',
+      desconto: orc.desconto?.toString() || '0',
+      observacao: orc.observacao || '',
+      foto_preview: orc.foto_url || ''
+    })
+    setModalAberto(true)
+  }
+
   async function salvarOrcamento() {
     if (!form.razao_social || !form.valor_unitario) return alert('Preencha Razão Social e Valor!')
     
     const vUnit = parseFloat(form.valor_unitario) || 0
-    const qtd = parseFloat(form.quantidade) || 1
+    const qtd = parseFloat(form.quantidade) || 0
     const desc = parseFloat(form.desconto) || 0
-    
-    // CÁLCULO AUTOMÁTICO DO TOTAL
     const vTotal = (vUnit * qtd) - desc
 
     const dados = {
@@ -61,7 +88,7 @@ export default function OrcamentoPage() {
       descricao_servico: form.descricao,
       quantidade: qtd,
       valor_unitario: vUnit,
-      valor_total: vTotal, // Enviando o total calculado
+      valor_total: vTotal,
       desconto: desc,
       observacao: form.observacao,
       foto_url: form.foto_preview
@@ -84,7 +111,7 @@ export default function OrcamentoPage() {
     setEditandoId(null)
     setForm({ 
       razao_social: '', solicitante: '', documento: '', telefone: '',
-      descricao: '', quantidade: '1', valor_unitario: '',
+      descricao: '', quantidade: '', valor_unitario: '',
       desconto: '0', observacao: '', foto_preview: ''
     })
   }
@@ -99,35 +126,77 @@ export default function OrcamentoPage() {
           </button>
         </div>
 
-        {/* LISTA DE CARDS */}
         <div className="space-y-3">
           {carregando ? (
             <div className="flex justify-center py-10 opacity-20"><Loader2 className="animate-spin" /></div>
           ) : orcamentos.map((orc) => (
             <div key={orc.id} className="bg-[#0d1726] border border-slate-800 p-4 rounded-2xl">
               <div className="flex justify-between items-start">
-                <div>
+                <div className="flex-1">
                   <p className="text-[10px] font-black text-blue-500 uppercase">#{orc.id.toString().slice(-4)}</p>
-                  <p className="font-bold uppercase text-xs truncate w-40">{orc.cliente}</p>
+                  <p className="font-bold uppercase text-xs truncate w-32">{orc.cliente}</p>
                 </div>
-                <p className="text-lg font-black text-emerald-400">R$ {orc.valor_total?.toFixed(2)}</p>
+                <div className="flex items-center gap-2">
+                  {/* BOTÃO DE EDIÇÃO NO CARD */}
+                  <button onClick={() => abrirEdicao(orc)} className="p-2 bg-slate-800 rounded-lg text-slate-400 active:scale-90">
+                    <Edit3 size={16} />
+                  </button>
+                  <p className="text-sm font-black text-emerald-400 ml-2">R$ {orc.valor_total?.toFixed(2)}</p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </main>
 
-      {/* MODAL COM OS NOVOS CAMPOS */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-end justify-center">
-          <div className="w-full max-w-md bg-[#0d1726] rounded-t-[32px] p-6 max-h-[92vh] overflow-y-auto border-t border-slate-700">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center">
+          <div className="w-full max-w-md bg-[#0d1726] rounded-t-[40px] p-6 max-h-[92vh] overflow-y-auto border-t border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6 sticky top-0 bg-[#0d1726] z-10 pb-2">
               <h2 className="text-lg font-black italic uppercase">{editandoId ? 'Editar' : 'Novo'} Orçamento</h2>
               <button onClick={fecharModal} className="bg-slate-800 p-2 rounded-full"><X size={20}/></button>
             </div>
 
             <div className="space-y-4 pb-10">
-              {/* DADOS DO CLIENTE */}
+              
+              {/* SEÇÃO DE FOTO */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Imagem do Serviço</p>
+                <div className="flex gap-3">
+                  {/* Botão Galeria */}
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"
+                  >
+                    <ImageIcon size={16} /> Galeria
+                  </button>
+                  {/* Botão Câmera */}
+                  <button 
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 p-3 rounded-xl text-xs font-bold text-slate-300"
+                  >
+                    <Camera size={16} /> Câmera
+                  </button>
+                </div>
+                
+                {/* Inputs Escondidos */}
+                <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFoto} />
+                <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} className="hidden" onChange={handleFoto} />
+
+                {/* Preview da Foto */}
+                {form.foto_preview && (
+                  <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-slate-700">
+                    <img src={form.foto_preview} alt="Preview" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => setForm({...form, foto_preview: ''})}
+                      className="absolute top-2 right-2 bg-red-500 p-1 rounded-full text-white"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Dados do Cliente</p>
                 <InputIcon Icone={User} placeholder="Razão Social" value={form.razao_social} onChange={(v) => setForm({...form, razao_social: v})} />
@@ -136,7 +205,6 @@ export default function OrcamentoPage() {
                 <InputIcon Icone={Phone} placeholder="Telefone" value={form.telefone} onChange={(v) => setForm({...form, telefone: v})} />
               </div>
 
-              {/* DADOS DO SERVIÇO */}
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Dados do Serviço</p>
                 <textarea 
@@ -158,10 +226,9 @@ export default function OrcamentoPage() {
                 />
               </div>
 
-              {/* BOTÃO SALVAR */}
               <button onClick={salvarOrcamento} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
                 <Save size={18} />
-                {editandoId ? 'Salvar Alterações' : 'Gerar Orçamento'}
+                {editandoId ? 'Atualizar Orçamento' : 'Gerar Orçamento'}
               </button>
             </div>
           </div>
@@ -171,7 +238,6 @@ export default function OrcamentoPage() {
   )
 }
 
-// COMPONENTE DE INPUT REUTILIZÁVEL
 function InputIcon({ Icone, placeholder, value, onChange }: { Icone: any, placeholder: string, value: string, onChange: (v: string) => void }) {
   return (
     <div className="relative">
