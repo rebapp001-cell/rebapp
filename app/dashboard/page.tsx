@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 <WifiOff size={18} className="text-rose-500 animate-pulse" />
               )}
             </div>
-            <p className={`text-sm font-bold uppercase tracking-widest ${clean ? 'text-slate-400' : 'text-blue-400/60'}`}>
+            <p className={`text-sm font-bold uppercase tracking-widest ${clean ? 'text-slate-400' : 'text-red-400/60'}`}>
               {isOnline ? 'Online' : 'Offline - Dados Locais'}
             </p>
           </div>
@@ -131,15 +131,15 @@ export default function DashboardPage() {
         </div>
 
         {/* PERFIL E ATALHOS */}
-        <div className={`rounded-3xl p-6 mb-6 shadow-2xl border ${clean ? 'bg-white border-slate-100' : 'bg-linear-to-br from-[#111d31] to-[#0a1220] border-blue-500/20'
+        <div className={`rounded-3xl p-6 mb-6 shadow-2xl border ${clean ? 'bg-white border-slate-100' : 'bg-linear-to-br from-[#111d31] to-[#0a1220] border-red-500/20'
           }`}>
           <div className="flex items-center justify-between mb-8">
             <div className="min-w-0">
-              <p className={`text-sm font-medium ${clean ? 'text-slate-500' : 'text-blue-300'}`}>Bem-vindo,</p>
+              <p className={`text-sm font-medium ${clean ? 'text-slate-500' : 'text-red-300'}`}>Bem-vindo,</p>
               <p className="text-2xl font-black truncate">{usuarioLogado?.nome || 'Usuário'}</p>
               <p className="text-xs font-bold uppercase opacity-60">{usuarioLogado?.perfil || 'Acessando...'}</p>
             </div>
-            <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+            <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-600/30">
               <User size={28} strokeWidth={2.5} />
             </div>
           </div>
@@ -170,12 +170,12 @@ export default function DashboardPage() {
                   filtroStatus === 'cancelado' ? 'OS Canceladas' : 'Resultado'}
             </h2>
             {filtroStatus !== 'todas' && (
-              <button onClick={() => setFiltroStatus('todas')} className="text-[10px] font-black text-blue-500 uppercase bg-blue-500/10 px-2 py-1 rounded-lg">
+              <button onClick={() => setFiltroStatus('todas')} className="text-[10px] font-black text-red-500 uppercase bg-red-500/10 px-2 py-1 rounded-lg">
                 Limpar Filtro
               </button>
             )}
             {filtroStatus === 'todas' && (
-              <button onClick={() => router.push('/ordens')} className="text-blue-500 text-xs font-bold uppercase flex items-center gap-1">
+              <button onClick={() => router.push('/ordens')} className="text-red-500 text-xs font-bold uppercase flex items-center gap-1">
                 Ver tudo <ArrowUpRight size={14} />
               </button>
             )}
@@ -212,12 +212,12 @@ export default function DashboardPage() {
                   <div
                     key={ordem.id}
                     onClick={() => router.push(`/ordens/${ordem.id}`)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] hover:border-blue-500/50 ${clean ? 'bg-slate-50 border-slate-100' : 'bg-[#111c2e] border-slate-700/50'
+                    className={`p-4 rounded-2xl border cursor-pointer transition-all active:scale-[0.98] hover:border-red-500/50 ${clean ? 'bg-slate-50 border-slate-100' : 'bg-[#111c2e] border-slate-700/50'
                       }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-black text-blue-500">#{ordem.numero_os ?? ordem.id}</span>
+                        <span className="font-black text-red-500">#{ordem.numero_os ?? ordem.id}</span>
 
                         {/* INDICADOR DE FATURAMENTO PARA FINALIZADAS */}
                         {ordem.status === 'Finalizado' && (
@@ -255,9 +255,9 @@ export default function DashboardPage() {
 
                     {/* EXIBIÇÃO DO TÉCNICO EM ANDAMENTO */}
                     {ordem.status === 'Em andamento' && ordem.usuario_responsavel && (
-                      <div className="mt-2 p-2 bg-blue-500/5 border border-blue-500/20 rounded-lg flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                        <p className="text-[10px] font-black uppercase text-blue-500">
+                      <div className="mt-2 p-2 bg-red-500/5 border border-red-500/20 rounded-lg flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <p className="text-[10px] font-black uppercase text-red-500">
                           Executando: <span className="opacity-80 font-bold">{ordem.usuario_responsavel}</span>
                         </p>
                       </div>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
 
 function Atalho({ titulo, Icone, onClick, destaque, clean }: any) {
   return (
-    <button onClick={onClick} className={`h-20 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-90 border ${destaque ? 'bg-blue-600 border-blue-400 text-white' : clean ? 'bg-slate-50 border-slate-100 text-slate-600' : 'bg-[#121c2c] border-slate-700 text-slate-300'
+    <button onClick={onClick} className={`h-20 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-90 border ${destaque ? 'bg-red-600 border-red-400 text-white' : clean ? 'bg-slate-50 border-slate-100 text-slate-600' : 'bg-[#121c2c] border-slate-700 text-slate-300'
       }`}>
       <Icone size={22} strokeWidth={destaque ? 3 : 2} />
       <span className="text-[10px] font-bold uppercase tracking-tighter">{titulo}</span>
@@ -330,7 +330,7 @@ function Atalho({ titulo, Icone, onClick, destaque, clean }: any) {
 
 function CardMini({ titulo, valor, Icone, cor, clean, onClick }: any) {
   const cores: Record<string, string> = {
-    blue: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    blue: 'text-red-500 bg-red-500/10 border-red-500/20',
     amber: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
     emerald: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
     rose: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
@@ -349,7 +349,7 @@ function CardMini({ titulo, valor, Icone, cor, clean, onClick }: any) {
 
 function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center py-2 transition-colors ${ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+    <button onClick={onClick} className={`flex flex-col items-center justify-center py-2 transition-colors ${ativo ? 'text-red-500' : clean ? 'text-slate-400' : 'text-slate-500'
       }`}>
       <Icone size={22} strokeWidth={ativo ? 3 : 2} />
       <span className={`mt-1 text-[10px] font-bold uppercase tracking-tighter ${ativo ? 'opacity-100' : 'opacity-60'}`}>

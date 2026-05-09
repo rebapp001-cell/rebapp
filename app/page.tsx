@@ -79,13 +79,13 @@ export default function LoginPage() {
       <div className="absolute top-6 right-6 flex bg-slate-800/10 p-1 rounded-xl border border-slate-700/20 backdrop-blur-sm">
         <button 
           onClick={() => alternarTema('dark')}
-          className={`p-2 rounded-lg transition-all ${tema === 'dark' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-400'}`}
+          className={`p-2 rounded-lg transition-all ${tema === 'dark' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-400'}`}
         >
           <Moon size={18} />
         </button>
         <button 
           onClick={() => alternarTema('clean')}
-          className={`p-2 rounded-lg transition-all ${tema === 'clean' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-600'}`}
+          className={`p-2 rounded-lg transition-all ${tema === 'clean' ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-600'}`}
         >
           <Sun size={18} />
         </button>
@@ -113,7 +113,7 @@ export default function LoginPage() {
             : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-start gap-4 mb-10">
-            <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20 text-white">
+            <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/20 text-white">
               <Lock size={28} strokeWidth={2.5} />
             </div>
 
@@ -128,10 +128,10 @@ export default function LoginPage() {
           <div className="space-y-5 mb-8">
             <div>
               <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block px-2 tracking-widest">Usuário</label>
-              <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-blue-500 transition-all ${
+              <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-red-500 transition-all ${
                 tema === 'dark' ? 'bg-[#111c2e] border-slate-700/50' : 'bg-slate-50 border-slate-200'
               }`}>
-                <User size={20} className="text-blue-500" />
+                <User size={20} className="text-red-500" />
                 <input
                   type="text"
                   value={usuario}
@@ -146,10 +146,10 @@ export default function LoginPage() {
 
             <div>
               <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block px-2 tracking-widest">Senha</label>
-              <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-blue-500 transition-all ${
+              <div className={`border rounded-2xl px-4 py-4 flex items-center gap-3 focus-within:border-red-500 transition-all ${
                 tema === 'dark' ? 'bg-[#111c2e] border-slate-700/50' : 'bg-slate-50 border-slate-200'
               }`}>
-                <Lock size={20} className="text-blue-500" />
+                <Lock size={20} className="text-red-500" />
                 <input
                   type={mostrarSenha ? 'text' : 'password'}
                   value={senha}
@@ -169,7 +169,7 @@ export default function LoginPage() {
           <button
             onClick={fazerLogin}
             disabled={carregando}
-            className="w-full bg-blue-600 hover:bg-blue-700 transition-all py-5 rounded-2xl font-black uppercase tracking-widest text-xs text-white shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 transition-all py-5 rounded-2xl font-black uppercase tracking-widest text-xs text-white shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
           >
             {carregando ? 'Processando...' : <><LogIn size={18} /> Entrar no Sistema</>}
           </button>
@@ -182,7 +182,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            className={`w-full border rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest text-blue-500 hover:bg-blue-500/5 transition-all flex items-center justify-center gap-2 ${
+            className={`w-full border rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500/5 transition-all flex items-center justify-center gap-2 ${
               tema === 'dark' ? 'border-slate-700/50' : 'border-slate-200'
             }`}
             onClick={() => alert('Procure o administrador.')}

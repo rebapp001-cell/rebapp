@@ -126,7 +126,7 @@ export default function FaturamentoPage() {
 
         {/* BUSCA */}
         <div className={`flex items-center gap-3 p-4 rounded-2xl border mb-6 ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-slate-800'}`}>
-          <Search size={18} className="text-blue-500" />
+          <Search size={18} className="text-red-500" />
           <input
             placeholder="Buscar por cliente ou OS..."
             className="bg-transparent outline-none text-sm w-full font-medium"
@@ -164,7 +164,7 @@ export default function FaturamentoPage() {
                 <div className={`mb-5 p-4 rounded-2xl border flex flex-col gap-3 ${clean ? 'bg-slate-50 border-slate-100' : 'bg-white/5 border-white/10'}`}>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <Store size={14} className="text-blue-500" />
+                      <Store size={14} className="text-red-500" />
                       <span className="text-[10px] font-black uppercase tracking-tighter">
                         {ordem.unidade_faturamento || '---'}
                       </span>
@@ -191,7 +191,7 @@ export default function FaturamentoPage() {
 
               <button
                 onClick={(e) => prepararFaturamento(e, ordem)}
-                className="w-full py-4 rounded-xl bg-blue-600/10 text-blue-500 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all active:scale-95"
+                className="w-full py-4 rounded-xl bg-red-600/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
               >
                 {ehFaturamento ? 'Gerenciar Faturamento' : 'Ver Dados de Venda'}
               </button>
@@ -221,7 +221,7 @@ export default function FaturamentoPage() {
                     <button
                       key={u}
                       onClick={() => setUnidade(u)}
-                      className={`py-3 rounded-xl text-[9px] font-black border transition-all ${unidade === u ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-700 opacity-40'}`}
+                      className={`py-3 rounded-xl text-[9px] font-black border transition-all ${unidade === u ? 'bg-red-600 border-red-600 text-white' : 'border-slate-700 opacity-40'}`}
                     >
                       {u}
                     </button>
@@ -255,7 +255,7 @@ export default function FaturamentoPage() {
               <button
                 onClick={salvarFaturamento}
                 disabled={salvando}
-                className="w-full py-5 rounded-2xl font-black uppercase tracking-widest mt-4 bg-blue-600 text-white shadow-lg active:scale-95 transition-all"
+                className="w-full py-5 rounded-2xl font-black uppercase tracking-widest mt-4 bg-red-600 text-white shadow-lg active:scale-95 transition-all"
               >
                 {salvando ? 'Salvando...' : 'Confirmar Faturamento'}
               </button>
@@ -309,7 +309,7 @@ function InputField({ label, icon: Icon, value, onChange, placeholder, clean }: 
     <div>
       <label className="text-[9px] font-black uppercase opacity-40 ml-1">{label}</label>
       <div className={`flex items-center gap-3 p-4 rounded-2xl border mt-1.5 ${clean ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-slate-800'}`}>
-        <Icon size={18} className="text-blue-500" />
+        <Icon size={18} className="text-red-500" />
         <input
           value={value}
           onChange={e => onChange(e.target.value)}
@@ -323,7 +323,7 @@ function InputField({ label, icon: Icon, value, onChange, placeholder, clean }: 
 
 function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center justify-center py-1 transition-all ${ativo ? 'text-blue-500 scale-110' : clean ? 'text-slate-400' : 'text-slate-500'}`}>
+    <button onClick={onClick} className={`flex flex-col items-center justify-center py-1 transition-all ${ativo ? 'text-red-500 scale-110' : clean ? 'text-slate-400' : 'text-slate-500'}`}>
       <Icone size={22} strokeWidth={ativo ? 3 : 2} />
       <span className="mt-1 text-[9px] font-black uppercase tracking-tighter">{titulo}</span>
     </button>

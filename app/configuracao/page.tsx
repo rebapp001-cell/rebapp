@@ -110,14 +110,14 @@ export default function ConfiguracaoPage() {
               clean={clean}
             />
 
-            <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl mt-2 transition-all shadow-lg shadow-blue-600/20">
+            <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl mt-2 transition-all shadow-lg shadow-red-600/20">
               Alterar senha
             </button>
           </div>
 
           {/* DICAS DE SENHA */}
           <div className={`mt-6 p-4 rounded-2xl border ${
-            clean ? 'bg-blue-50 border-blue-100' : 'bg-blue-500/5 border-blue-500/20'
+            clean ? 'bg-red-50 border-red-100' : 'bg-red-500/5 border-red-500/20'
           }`}>
             <div className="flex gap-3 mb-3 text-red-500">
               <Info size={18} />
@@ -173,7 +173,7 @@ function ThemeCard({ active, label, sub, Icon, onClick, clean }: any) {
       onClick={onClick}
       className={`flex flex-col p-4 rounded-2xl border text-left transition-all ${
         active 
-          ? 'border-red-600 bg-blue-600/5 ring-1 ring-red-600' 
+          ? 'border-red-600 bg-red-600/5 ring-1 ring-red-600' 
           : clean ? 'border-slate-200 bg-slate-50' : 'border-slate-800 bg-[#111f35]'
       }`}
     >
