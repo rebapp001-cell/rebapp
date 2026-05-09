@@ -86,7 +86,7 @@ export default function ConfiguracaoPage() {
         {/* SEÇÃO: ALTERAR SENHA */}
         <section className={`rounded-3xl p-6 ${clean ? 'bg-white shadow-sm' : 'bg-[#0b1628]'}`}>
           <div className="flex items-center gap-3 mb-6">
-            <Lock size={20} className="text-blue-500" />
+            <Lock size={20} className="text-red-500" />
             <h2 className="text-lg font-semibold">Alterar senha</h2>
           </div>
 
@@ -110,7 +110,7 @@ export default function ConfiguracaoPage() {
               clean={clean}
             />
 
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl mt-2 transition-all shadow-lg shadow-blue-600/20">
+            <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl mt-2 transition-all shadow-lg shadow-blue-600/20">
               Alterar senha
             </button>
           </div>
@@ -119,16 +119,16 @@ export default function ConfiguracaoPage() {
           <div className={`mt-6 p-4 rounded-2xl border ${
             clean ? 'bg-blue-50 border-blue-100' : 'bg-blue-500/5 border-blue-500/20'
           }`}>
-            <div className="flex gap-3 mb-3 text-blue-500">
+            <div className="flex gap-3 mb-3 text-red-500">
               <Info size={18} />
               <p className="text-sm font-semibold">Sua senha deve ser:</p>
             </div>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-xs opacity-80">
-                <CheckCircle2 size={14} className="text-blue-500" /> Apenas números
+                <CheckCircle2 size={14} className="text-red-500" /> Apenas números
               </div>
               <div className="flex items-center gap-2 text-xs opacity-80">
-                <CheckCircle2 size={14} className="text-blue-500" /> Até 4 dígitos
+                <CheckCircle2 size={14} className="text-red-500" /> Até 4 dígitos
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
     <button 
       onClick={onClick} 
       className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
-        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+        ativo ? 'text-red-500' : clean ? 'text-slate-400' : 'text-slate-500'
       }`}
     >
       <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
@@ -173,12 +173,12 @@ function ThemeCard({ active, label, sub, Icon, onClick, clean }: any) {
       onClick={onClick}
       className={`flex flex-col p-4 rounded-2xl border text-left transition-all ${
         active 
-          ? 'border-blue-600 bg-blue-600/5 ring-1 ring-blue-600' 
+          ? 'border-red-600 bg-blue-600/5 ring-1 ring-red-600' 
           : clean ? 'border-slate-200 bg-slate-50' : 'border-slate-800 bg-[#111f35]'
       }`}
     >
-      <Icon size={20} className={active ? 'text-blue-500' : 'text-slate-400'} />
-      <span className={`mt-3 font-bold text-sm ${active && 'text-blue-500'}`}>{label}</span>
+      <Icon size={20} className={active ? 'text-red-500' : 'text-slate-400'} />
+      <span className={`mt-3 font-bold text-sm ${active && 'text-red-500'}`}>{label}</span>
       <span className="text-[10px] opacity-60">{sub}</span>
     </button>
   )
@@ -188,7 +188,7 @@ function ThemeCard({ active, label, sub, Icon, onClick, clean }: any) {
 function InputSenha({ placeholder, visible, toggleVisible, clean }: any) {
   return (
     <div className="relative group">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-red-500">
         <Lock size={18} />
       </div>
       <input
@@ -196,14 +196,14 @@ function InputSenha({ placeholder, visible, toggleVisible, clean }: any) {
         placeholder={placeholder}
         className={`w-full pl-12 pr-12 py-4 rounded-xl border outline-none text-sm transition-all ${
           clean 
-            ? 'bg-slate-50 border-slate-200 focus:border-blue-500' 
-            : 'bg-[#101d31] border-slate-800 focus:border-blue-500'
+            ? 'bg-slate-50 border-slate-200 focus:border-red-500' 
+            : 'bg-[#101d31] border-slate-800 focus:border-red-500'
         }`}
       />
       <button 
         type="button"
         onClick={toggleVisible}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-500"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-red-500"
       >
         {visible ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
