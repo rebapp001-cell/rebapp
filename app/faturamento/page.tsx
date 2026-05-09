@@ -21,7 +21,7 @@ export default function FaturamentoPage() {
   // Estados do Modal de Gerenciamento
   const [modalAberto, setModalAberto] = useState(false)
   const [osSelecionada, setOsSelecionada] = useState<any>(null)
-  const [unidade, setUnidade] = useState('')
+  const [unidade, setUnidade] = useState('R&B TORNEARIA')
   const [numPedido, setNumPedido] = useState('')
   const [numSistema, setNumSistema] = useState('')
   const [valor, setValor] = useState('')
@@ -59,7 +59,7 @@ export default function FaturamentoPage() {
   const prepararFaturamento = (e: React.MouseEvent, ordem: any) => {
     e.stopPropagation()
     setOsSelecionada(ordem)
-    setUnidade(ordem.unidade_faturamento || 'TORNEARIA DIVISA')
+    setUnidade('R&B TORNEARIA') // Força o nome novo ao abrir
     setNumPedido(ordem.numero_pedido_faturamento || '')
     setNumSistema(ordem.numero_os_faturamento || '')
     setValor(ordem.valor_faturamento || '')
@@ -142,7 +142,6 @@ export default function FaturamentoPage() {
           ) : ordensFiltradas.map((ordem) => (
             <div
               key={ordem.id}
-              // CORREÇÃO DA ROTA: Agora aponta para /ordens/[id]
               onClick={() => router.push(`/ordens/${ordem.id}`)}
               className={`rounded-4xl border p-6 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] ${ordem.status_faturamento === 'Faturado'
                   ? 'border-emerald-500/30 bg-emerald-500/5'
@@ -213,19 +212,14 @@ export default function FaturamentoPage() {
             </div>
 
             <div className="space-y-4">
-              {/* Unidade Faturadora */}
+              {/* Unidade Faturadora - FIXO R&B TORNEARIA */}
               <div>
                 <label className="text-[9px] font-black uppercase opacity-40 ml-1">Unidade Faturadora</label>
-                <div className="grid grid-cols-2 gap-2 mt-1.5">
-                  {['TORNEARIA DIVISA', 'DIVISA IMPLEMENTOS'].map(u => (
-                    <button
-                      key={u}
-                      onClick={() => setUnidade(u)}
-                      className={`py-3 rounded-xl text-[9px] font-black border transition-all ${unidade === u ? 'bg-red-600 border-red-600 text-white' : 'border-slate-700 opacity-40'}`}
-                    >
-                      {u}
-                    </button>
-                  ))}
+                <div className="mt-1.5">
+                    <div className="w-full py-4 rounded-xl text-[10px] font-black border border-red-600 bg-red-600/10 text-red-500 flex items-center justify-center gap-2">
+                        <Store size={14} />
+                        R&B TORNEARIA
+                    </div>
                 </div>
               </div>
 
@@ -290,6 +284,7 @@ export default function FaturamentoPage() {
             titulo="Faturam."
             Icone={CircleDollarSign}
             clean={clean}
+            ativo={true}
             onClick={() => router.push('/faturamento')}
           />
           <MenuItem
