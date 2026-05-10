@@ -26,7 +26,6 @@ export default function LoginPage() {
   const [tema, setTema] = useState<'dark' | 'clean'>('dark')
 
   useEffect(() => {
-    // Garante que o título da página seja aplicado corretamente ao carregar
     document.title = "R&B Torneadora - Sistema OS"
     
     const temaSalvo = localStorage.getItem('tema-app') as 'dark' | 'clean' | null
@@ -97,10 +96,10 @@ export default function LoginPage() {
         <div className="flex justify-center mb-10">
           <div className="relative w-64 h-24">
             <Image
-              src="/logo-divisa.png" // Lembre-se de trocar o arquivo da logo na pasta public quando puder
+              src="/logo-divisa.png"
               alt="Logo R&B Torneadora"
               fill
-              className={`object-contain transition-all ${tema === 'clean' ? 'brightness-0 opacity-80' : ''}`}
+              className="object-contain" // Removido o filtro de brilho e opacidade
               priority
             />
           </div>
