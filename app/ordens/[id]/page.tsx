@@ -229,10 +229,10 @@ export default function DetalhesOSPage() {
               <span className={badgeEstilo(ordem?.status || '')}>{ordem?.status}</span>
             </div>
             <div className="no-print flex gap-2">
-              <button onClick={gerarPDF} disabled={gerandoPDF} className="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-500/10 rounded-xl">
+              <button onClick={gerarPDF} disabled={gerandoPDF} className="w-10 h-10 flex items-center justify-center text-red-500 bg-red-500/10 rounded-xl">
                 {gerandoPDF ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
               </button>
-              <button onClick={() => setModalEdicao(true)} className="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-500/10 rounded-xl"><Pencil size={18} /></button>
+              <button onClick={() => setModalEdicao(true)} className="w-10 h-10 flex items-center justify-center text-red-500 bg-red-500/10 rounded-xl"><Pencil size={18} /></button>
             </div>
           </div>
 
@@ -240,7 +240,7 @@ export default function DetalhesOSPage() {
           {!encerrada && (
             <section className={`no-print mb-6 p-4 rounded-3xl border ${clean ? 'bg-white border-slate-200' : 'bg-[#0d1726] border-slate-800'}`}>
               <div className="flex gap-2">
-                <button onClick={() => atualizarStatusExecucao('Em andamento')} className={`flex-1 py-4 rounded-xl border flex items-center justify-center gap-2 font-black text-[10px] uppercase ${ordem?.status === 'Em andamento' ? 'bg-blue-600 text-white border-blue-400' : clean ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                <button onClick={() => atualizarStatusExecucao('Em andamento')} className={`flex-1 py-4 rounded-xl border flex items-center justify-center gap-2 font-black text-[10px] uppercase ${ordem?.status === 'Em andamento' ? 'bg-red-600 text-white border-red-400' : clean ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
                   <PlayCircle size={18} /> Andamento
                 </button>
                 <button onClick={() => atualizarStatusExecucao('Parado')} className={`flex-1 py-4 rounded-xl border flex items-center justify-center gap-2 font-black text-[10px] uppercase ${ordem?.status === 'Parado' ? 'bg-amber-500 text-white border-amber-400' : clean ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
@@ -254,7 +254,7 @@ export default function DetalhesOSPage() {
                     <>
                       <input value={tecnicoAtuante} onChange={e => setTecnicoAtuante(e.target.value)} placeholder="Técnico" className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'}`} />
                       <textarea value={atividadeExecutada} onChange={e => setAtividadeExecutada(e.target.value)} placeholder="Atividade" className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'}`} />
-                      <button onClick={() => atualizarStatusExecucao('Em andamento')} className="w-full py-3 bg-blue-600 text-white rounded-xl font-black uppercase text-[10px]">Confirmar Início</button>
+                      <button onClick={() => atualizarStatusExecucao('Em andamento')} className="w-full py-3 bg-red-600 text-white rounded-xl font-black uppercase text-[10px]">Confirmar Início</button>
                     </>
                   )}
                   {mostrarCampoParada && (
@@ -282,12 +282,12 @@ export default function DetalhesOSPage() {
           {/* FOTOS */}
           <div className={`rounded-3xl p-6 mb-5 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-[10px] font-black uppercase text-blue-500">Fotos de Campo</h2>
-              {subindoFoto && <Loader2 size={14} className="animate-spin text-blue-500" />}
+              <h2 className="text-[10px] font-black uppercase text-red-500">Fotos de Campo</h2>
+              {subindoFoto && <Loader2 size={14} className="animate-spin text-red-500" />}
             </div>
             
             <div className="no-print grid grid-cols-2 gap-3 mb-6">
-               <label className="flex flex-col items-center justify-center gap-2 p-4 bg-blue-600 text-white rounded-2xl cursor-pointer hover:bg-blue-700 transition-all active:scale-95">
+               <label className="flex flex-col items-center justify-center gap-2 p-4 bg-red-600 text-white rounded-2xl cursor-pointer hover:bg-red-700 transition-all active:scale-95">
                  <Camera size={20}/>
                  <span className="text-[9px] font-black uppercase">Câmera</span>
                  <input type="file" hidden capture="environment" accept="image/*" onChange={handleAddFoto} disabled={subindoFoto} />
@@ -315,13 +315,13 @@ export default function DetalhesOSPage() {
 
           {/* MATERIAIS */}
           <div className="mb-5">
-            <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="no-print w-full py-4 mb-4 border-2 border-dashed border-blue-500/20 rounded-2xl text-blue-400 font-black uppercase text-[10px]">Adicionar Materiais</button>
+            <button onClick={() => router.push(`/ordens/${id_os}/material`)} className="no-print w-full py-4 mb-4 border-2 border-dashed border-red-500/20 rounded-2xl text-red-400 font-black uppercase text-[10px]">Adicionar Materiais</button>
             {materiais.length > 0 && (
               <div className={`rounded-3xl p-6 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
-                <h2 className="text-[10px] font-black uppercase mb-4 text-blue-500">Peças / Materiais</h2>
+                <h2 className="text-[10px] font-black uppercase mb-4 text-red-500">Peças / Materiais</h2>
                 {materiais.map(m => (
                   <div key={m.id} className="mb-3 pb-3 border-b border-white/5 last:border-0">
-                    <p className="text-xs font-bold uppercase">{m.descricao} <span className="text-blue-500 ml-1">x{m.quantidade}</span></p>
+                    <p className="text-xs font-bold uppercase">{m.descricao} <span className="text-red-500 ml-1">x{m.quantidade}</span></p>
                   </div>
                 ))}
               </div>
@@ -331,7 +331,7 @@ export default function DetalhesOSPage() {
           {/* HISTÓRICO */}
           <div className={`rounded-3xl p-6 mb-10 border ${clean ? 'bg-white' : 'bg-[#0d1726] border-slate-800'}`}>
             <div className="flex items-center gap-2 mb-6">
-               <h2 className="text-[10px] font-black uppercase text-blue-500">Histórico de Serviço</h2>
+               <h2 className="text-[10px] font-black uppercase text-red-500">Histórico de Serviço</h2>
             </div>
             <div className="space-y-6">
                 {atualizacoes.map(at => {
@@ -339,12 +339,12 @@ export default function DetalhesOSPage() {
                   const isParado = at.descricao.includes('PARADA:');
                   
                   return (
-                    <div key={at.id} className={`border-l-2 pl-4 transition-colors ${isIniciado ? 'border-blue-500' : isParado ? 'border-amber-500' : 'border-slate-500/30'}`}>
+                    <div key={at.id} className={`border-l-2 pl-4 transition-colors ${isIniciado ? 'border-red-500' : isParado ? 'border-amber-500' : 'border-slate-500/30'}`}>
                       <div className="flex items-center gap-2 opacity-40 mb-1">
                         <Clock size={10} />
                         <p className="text-[9px] font-black uppercase">{new Date(at.created_at).toLocaleDateString()} - {at.tecnicos_responsaveis || at.usuario_nome}</p>
                       </div>
-                      <p className={`text-xs font-bold ${isIniciado ? 'text-blue-400' : isParado ? 'text-amber-400' : ''}`}>{at.descricao}</p>
+                      <p className={`text-xs font-bold ${isIniciado ? 'text-red-400' : isParado ? 'text-amber-400' : ''}`}>{at.descricao}</p>
                     </div>
                   )
                 })}
@@ -395,12 +395,12 @@ export default function DetalhesOSPage() {
       {modalEdicao && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-100 flex items-center justify-center p-6">
             <div className={`w-full max-w-sm rounded-4xl p-8 border ${clean ? 'bg-white text-black' : 'bg-[#0d1726] border-slate-700 text-white'}`}>
-                <h2 className="text-lg font-black uppercase mb-6 italic text-blue-500">Editar OS</h2>
+                <h2 className="text-lg font-black uppercase mb-6 italic text-red-500">Editar OS</h2>
                 <div className="space-y-4">
                     <input value={editForm.cliente} onChange={e => setEditForm({...editForm, cliente: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Cliente" />
                     <input value={editForm.maquina} onChange={e => setEditForm({...editForm, maquina: e.target.value})} className={`w-full p-3 rounded-xl border ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Máquina" />
                     <textarea value={editForm.descricao} onChange={e => setEditForm({...editForm, descricao: e.target.value})} className={`w-full p-3 rounded-xl border min-h-25 ${clean ? 'bg-slate-50' : 'bg-slate-900 border-slate-700'}`} placeholder="Descrição" />
-                    <button onClick={salvarEdicaoOS} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase shadow-lg shadow-blue-600/20">{salvandoEdicao ? 'Salvando...' : 'Salvar'}</button>
+                    <button onClick={salvarEdicaoOS} className="w-full py-4 bg-red-600 text-white rounded-2xl font-black uppercase shadow-lg shadow-red-600/20">{salvandoEdicao ? 'Salvando...' : 'Salvar'}</button>
                     <button onClick={() => setModalEdicao(false)} className="w-full text-xs font-bold uppercase mt-2 opacity-50">Fechar</button>
                 </div>
             </div>
@@ -413,7 +413,7 @@ export default function DetalhesOSPage() {
 function InfoItem({ Icone, titulo, texto, full, clean }: any) {
   return (
     <div className={`${full ? 'col-span-2' : ''} flex gap-3`}>
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${clean ? 'bg-blue-50 text-blue-600' : 'bg-blue-500/10 text-blue-400'}`}><Icone size={16}/></div>
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${clean ? 'bg-red-50 text-red-600' : 'bg-red-500/10 text-red-400'}`}><Icone size={16}/></div>
       <div>
         <p className="text-[9px] font-black uppercase opacity-40">{titulo}</p>
         <p className="text-xs font-bold leading-tight">{texto}</p>
@@ -427,7 +427,7 @@ function MenuNav({ titulo, Icone, ativo, onClick, clean }: any) {
     <button 
       onClick={onClick} 
       className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
-        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+        ativo ? 'text-red-500' : clean ? 'text-slate-400' : 'text-slate-500'
       }`}
     >
       <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
@@ -441,5 +441,5 @@ function badgeEstilo(status: string) {
   if (status === 'Finalizado') return base + 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
   if (status === 'Cancelado') return base + 'bg-rose-500/10 border-rose-500/20 text-rose-500'
   if (status === 'Parado') return base + 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-  return base + 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+  return base + 'bg-red-500/10 border-red-500/20 text-red-500'
 }

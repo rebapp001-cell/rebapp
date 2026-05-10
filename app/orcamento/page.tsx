@@ -128,7 +128,7 @@ export default function OrcamentoPage() {
       <main className="max-w-md mx-auto px-4 pt-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-black italic uppercase">Orçamentos</h1>
-          <button onClick={() => setModalAberto(true)} className="bg-blue-600 p-3 rounded-xl active:scale-95 transition-all">
+          <button onClick={() => setModalAberto(true)} className="bg-red-600 p-3 rounded-xl active:scale-95 transition-all">
             <Plus size={24} strokeWidth={3} />
           </button>
         </div>
@@ -140,7 +140,7 @@ export default function OrcamentoPage() {
             <div key={orc.id} className="bg-[#0d1726] border border-slate-800 p-4 rounded-2xl">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <p className="text-[10px] font-black text-blue-500 uppercase">#{orc.id.toString().slice(-4)}</p>
+                  <p className="text-[10px] font-black text-red-500 uppercase">#{orc.id.toString().slice(-4)}</p>
                   <p className="font-bold uppercase text-xs truncate w-32">{orc.cliente}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -197,16 +197,16 @@ export default function OrcamentoPage() {
 
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-slate-500 uppercase ml-1">Dados do Serviço</p>
-                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-20 outline-none text-white focus:border-blue-500" placeholder="Descrição do Serviço" value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} />
+                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-20 outline-none text-white focus:border-red-500" placeholder="Descrição do Serviço" value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} />
                 <div className="grid grid-cols-2 gap-3">
                   <InputIcon Icone={Hash} placeholder="Quantidade" value={form.quantidade} onChange={(v) => setForm({...form, quantidade: v})} />
                   <InputMoeda Icone={CircleDollarSign} placeholder="Unitário" value={form.valor_unitario} onChange={(v) => setForm({...form, valor_unitario: v})} />
                 </div>
                 <InputMoeda Icone={CircleDollarSign} placeholder="Desconto" value={form.desconto} onChange={(v) => setForm({...form, desconto: v})} />
-                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-16 outline-none text-white focus:border-blue-500" placeholder="Observações Adicionais" value={form.observacao} onChange={e => setForm({...form, observacao: e.target.value})} />
+                <textarea className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs h-16 outline-none text-white focus:border-red-500" placeholder="Observações Adicionais" value={form.observacao} onChange={e => setForm({...form, observacao: e.target.value})} />
               </div>
 
-              <button onClick={salvarOrcamento} className="w-full py-4 bg-blue-600 rounded-xl font-black uppercase text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+              <button onClick={salvarOrcamento} className="w-full py-4 bg-red-600 rounded-xl font-black uppercase text-sm shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
                 <Save size={18} />
                 {editandoId ? 'Atualizar Orçamento' : 'Gerar Orçamento'}
               </button>
@@ -223,9 +223,9 @@ function InputMoeda({ Icone, placeholder, value, onChange }: { Icone: any, place
   return (
     <div className="relative">
       <Icone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-      <span className="absolute left-8 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500">R$</span>
+      <span className="absolute left-8 top-1/2 -translate-y-1/2 text-[10px] font-bold text-red-500">R$</span>
       <input 
-        className="w-full bg-slate-900 border border-slate-700 py-3 pl-14 pr-3 rounded-xl text-xs outline-none text-white focus:border-blue-500 font-mono"
+        className="w-full bg-slate-900 border border-slate-700 py-3 pl-14 pr-3 rounded-xl text-xs outline-none text-white focus:border-red-500 font-mono"
         placeholder={placeholder}
         type="text"
         value={value}
@@ -239,7 +239,7 @@ function InputIcon({ Icone, placeholder, value, onChange }: { Icone: any, placeh
   return (
     <div className="relative">
       <Icone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-      <input className="w-full bg-slate-900 border border-slate-700 py-3 pl-10 pr-3 rounded-xl text-xs outline-none text-white focus:border-blue-500" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
+      <input className="w-full bg-slate-900 border border-slate-700 py-3 pl-10 pr-3 rounded-xl text-xs outline-none text-white focus:border-red-500" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} />
     </div>
   )
 }

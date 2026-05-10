@@ -102,7 +102,7 @@ export default function AdicionarMaterialPage() {
         </button>
         <div>
           <h1 className="text-xl font-black uppercase italic tracking-tighter">Acrescentar Material</h1>
-          <p className="text-blue-500 text-[10px] font-bold uppercase tracking-widest">Setor de Usinagem / OS #{id_os}</p>
+          <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest">Setor de Usinagem / OS #{id_os}</p>
         </div>
       </header>
 
@@ -147,7 +147,7 @@ export default function AdicionarMaterialPage() {
             <button
               onClick={salvarMaterial}
               disabled={loading}
-              className="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase mt-6 flex items-center justify-center gap-2 text-white active:scale-95 transition-all shadow-lg shadow-blue-600/20"
+              className="w-full bg-red-600 py-5 rounded-2xl font-black uppercase mt-6 flex items-center justify-center gap-2 text-white active:scale-95 transition-all shadow-lg shadow-red-600/20"
             >
               {loading ? <Loader2 className="animate-spin" /> : <><Save size={20} /> Salvar na Ordem</>}
             </button>
@@ -164,9 +164,9 @@ function BotaoTipo({ ativo, onClick, label, Icone, clean }: any) {
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
         ativo 
-          ? 'bg-blue-600 border-blue-400 text-white shadow-lg' 
+          ? 'bg-red-600 border-red-400 text-white shadow-lg' 
           : clean 
-            ? 'bg-white border-slate-200 text-slate-400 hover:border-blue-200' 
+            ? 'bg-white border-slate-200 text-slate-400 hover:border-red-200' 
             : 'bg-[#0d1726] border-white/5 text-slate-500 hover:border-white/20'
       }`}
     >
@@ -187,7 +187,7 @@ function InputGeral({ label, placeholder, value, onChange, type = "text", clean 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`border rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-blue-500 ${
+        className={`border rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-red-500 ${
           clean ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#0d1726] border-white/10 text-white'
         } w-full transition-all`}
       />

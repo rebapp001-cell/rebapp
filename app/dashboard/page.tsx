@@ -234,7 +234,7 @@ export default function DashboardPage() {
                           ? 'bg-rose-500/10 text-rose-500'
                           : ordem.status === 'Parado'
                             ? 'bg-amber-500 text-white'
-                            : 'bg-blue-500/10 text-blue-500'
+                            : 'bg-red-500/10 text-red-500'
                         }`}>
                         {ordem.status}
                       </span>

@@ -198,7 +198,7 @@ export default function NovaOSPage() {
               }`}>
               <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block tracking-widest">Descrição do Serviço</label>
               <div className="flex gap-3">
-                <FileText size={20} className="text-blue-500 mt-1" />
+                <FileText size={20} className="text-red-500 mt-1" />
                 <textarea
                   placeholder="Descreva o problema ou serviço..."
                   value={descricao}
@@ -214,10 +214,10 @@ export default function NovaOSPage() {
               <div className="grid grid-cols-2 gap-3">
                 <label className={`flex flex-col items-center justify-center p-4 rounded-3xl border border-dashed cursor-pointer transition-all active:scale-95 ${tema === 'dark' ? 'bg-[#111c2e]/50 border-slate-600' : 'bg-slate-50 border-slate-300'
                   }`}>
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-lg mb-2">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-red-600 text-white shadow-lg mb-2">
                     <Camera size={20} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-tighter text-blue-500">Câmera</span>
+                  <span className="text-[10px] font-black uppercase tracking-tighter text-red-500">Câmera</span>
                   <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
                 </label>
 
@@ -239,8 +239,8 @@ export default function NovaOSPage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {fotos.map((file, idx) => (
-                      <div key={idx} className="relative w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20 group">
-                        <ImageIcon size={16} className="text-blue-500" />
+                      <div key={idx} className="relative w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center border border-red-500/20 group">
+                        <ImageIcon size={16} className="text-red-500" />
                         <button
                           onClick={() => removerFoto(idx)}
                           className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-md"
@@ -258,7 +258,7 @@ export default function NovaOSPage() {
               <button
                 onClick={salvarOS}
                 disabled={salvando}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-red-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <Save size={18} /> {salvando ? 'PROCESSANDO...' : 'SALVAR ORDEM'}
               </button>
@@ -318,11 +318,11 @@ export default function NovaOSPage() {
 // Componentes Auxiliares
 function CampoModerno({ icone, label, placeholder, value, onChange, tema }: CampoProps) {
   return (
-    <div className={`rounded-3xl px-4 py-3 border transition-all focus-within:border-blue-500 ${tema === 'dark' ? 'bg-[#111c2e] border-slate-700/50' : 'bg-slate-50 border-slate-200'
+    <div className={`rounded-3xl px-4 py-3 border transition-all focus-within:border-red-500 ${tema === 'dark' ? 'bg-[#111c2e] border-slate-700/50' : 'bg-slate-50 border-slate-200'
       }`}>
       <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block px-1 tracking-widest">{label}</label>
       <div className="flex items-center gap-3">
-        <div className="text-blue-500">{icone}</div>
+        <div className="text-red-500">{icone}</div>
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -340,7 +340,7 @@ function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
       onClick={onClick}
       className={`flex flex-col items-center gap-1 transition-all active:scale-95 ${
         ativo 
-          ? 'text-blue-500' 
+          ? 'text-red-500' 
           : clean ? 'text-slate-400' : 'text-slate-500'
       }`}
     >

@@ -99,7 +99,7 @@ export default function OrdensPage() {
 
           <button
             onClick={() => router.push('/nova-os')}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-lg shadow-blue-600/20 flex items-center gap-2 shrink-0 transition-all active:scale-95"
+            className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl shadow-lg shadow-red-600/20 flex items-center gap-2 shrink-0 transition-all active:scale-95"
           >
             <Plus size={20} strokeWidth={3} />
             <span className="text-sm font-bold pr-1">Nova</span>
@@ -118,8 +118,8 @@ export default function OrdensPage() {
             onChange={(e) => setBusca(e.target.value)}
             className={`w-full py-4 pl-12 pr-4 rounded-2xl border outline-none transition-all font-medium text-sm ${
               clean 
-                ? 'bg-white border-slate-200 focus:border-blue-500 shadow-sm' 
-                : 'bg-[#0d1726] border-slate-800 focus:border-blue-500 text-white'
+                ? 'bg-white border-slate-200 focus:border-red-500 shadow-sm' 
+                : 'bg-[#0d1726] border-slate-800 focus:border-red-500 text-white'
             }`}
           />
         </div>
@@ -141,7 +141,7 @@ export default function OrdensPage() {
             clean ? 'border-slate-100' : 'border-slate-800'
           }`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-500">
+              <div className="w-10 h-10 rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
                 <ClipboardList size={22} />
               </div>
               <h2 className="font-bold">Resultados</h2>
@@ -170,12 +170,12 @@ export default function OrdensPage() {
                   key={ordem.id}
                   onClick={() => router.push(`/ordens/${ordem.id}`)}
                   className={`w-full border rounded-2xl p-4 text-left transition-all active:scale-[0.98] ${
-                    clean ? 'bg-slate-50 border-slate-100 hover:border-blue-200' : 'bg-[#111c2e] border-slate-700/50 hover:border-slate-600'
+                    clean ? 'bg-slate-50 border-slate-100 hover:border-red-200' : 'bg-[#111c2e] border-slate-700/50 hover:border-slate-600'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-600/20">
+                      <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-red-600/20">
                         {ordem.numero_os ?? ordem.id}
                       </div>
                       <div className="min-w-0">
@@ -195,7 +195,7 @@ export default function OrdensPage() {
                     <InfoLinha clean={clean} titulo="Máquina" texto={ordem.maquina} />
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-500/10 flex items-center justify-between text-blue-500 font-bold text-xs uppercase tracking-wider">
+                  <div className="mt-4 pt-3 border-t border-slate-500/10 flex items-center justify-between text-red-500 font-bold text-xs uppercase tracking-wider">
                     <span>Abrir Relatório</span>
                     <ChevronRight size={16} />
                   </div>
@@ -236,7 +236,7 @@ function BotaoFiltro({ label, ativo, onClick, clean }: any) {
       onClick={onClick}
       className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border ${
         ativo 
-          ? 'bg-blue-600 border-blue-500 text-white shadow-lg' 
+          ? 'bg-red-600 border-red-500 text-white shadow-lg' 
           : clean 
             ? 'bg-white border-slate-200 text-slate-400' 
             : 'bg-[#0d1726] border-slate-800 text-slate-500'
@@ -263,7 +263,7 @@ function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
     <button 
       onClick={onClick} 
       className={`flex flex-col items-center justify-center py-2 transition-all active:scale-90 ${
-        ativo ? 'text-blue-500' : clean ? 'text-slate-400' : 'text-slate-500'
+        ativo ? 'text-red-500' : clean ? 'text-slate-400' : 'text-slate-500'
       }`}
     >
       <Icone size={22} strokeWidth={ativo ? 2.5 : 2} />
@@ -275,7 +275,7 @@ function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
 function badgeStatus(status: string) {
   const base = "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 "
   switch (status) {
-    case 'Em andamento': return base + "bg-blue-500/10 text-blue-500"
+    case 'Em andamento': return base + "bg-red-500/10 text-red-500"
     case 'Finalizado': return base + "bg-emerald-500/10 text-emerald-500"
     case 'Cancelado': return base + "bg-rose-500/10 text-rose-500"
     case 'Parado':
