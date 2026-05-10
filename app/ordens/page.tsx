@@ -275,7 +275,7 @@ function MenuItem({ titulo, Icone, ativo, clean, onClick }: any) {
 function badgeStatus(status: string) {
   const base = "px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 "
   switch (status) {
-    case 'Em andamento': return base + "bg-blue-500/10 text-red-500"
+    case 'Em andamento': return base + "bg-blue-500/10 text-blue-500"
     case 'Finalizado': return base + "bg-emerald-500/10 text-emerald-500"
     case 'Cancelado': return base + "bg-rose-500/10 text-rose-500"
     case 'Parado':
