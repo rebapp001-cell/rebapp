@@ -330,7 +330,7 @@ function Atalho({ titulo, Icone, onClick, destaque, clean }: any) {
 
 function CardMini({ titulo, valor, Icone, cor, clean, onClick }: any) {
   const cores: Record<string, string> = {
-    blue: 'text-red-500 bg-red-500/10 border-red-500/20',
+    blue: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
     amber: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
     emerald: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
     rose: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
