@@ -255,9 +255,9 @@ export default function DashboardPage() {
 
                     {/* EXIBIÇÃO DO TÉCNICO EM ANDAMENTO */}
                     {ordem.status === 'Em andamento' && ordem.usuario_responsavel && (
-                      <div className="mt-2 p-2 bg-red-500/5 border border-red-500/20 rounded-lg flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        <p className="text-[10px] font-black uppercase text-red-500">
+                      <div className="mt-2 p-2 bg-red-500/5 border border-blue-500/20 rounded-lg flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <p className="text-[10px] font-black uppercase text-blue-500">
                           Executando: <span className="opacity-80 font-bold">{ordem.usuario_responsavel}</span>
                         </p>
                       </div>
