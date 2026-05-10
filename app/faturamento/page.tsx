@@ -21,7 +21,7 @@ export default function FaturamentoPage() {
   // Estados do Modal de Gerenciamento
   const [modalAberto, setModalAberto] = useState(false)
   const [osSelecionada, setOsSelecionada] = useState<any>(null)
-  const [unidade, setUnidade] = useState('R&B TORNEARIA')
+  const [unidade, setUnidade] = useState('R&B TORNEADORA')
   const [numPedido, setNumPedido] = useState('')
   const [numSistema, setNumSistema] = useState('')
   const [valor, setValor] = useState('')
