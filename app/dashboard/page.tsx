@@ -144,9 +144,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-2">
             <Atalho clean={clean} destaque titulo="Nova OS" Icone={Plus} onClick={() => router.push('/nova-os')} />
             <Atalho clean={clean} titulo="Ordens" Icone={ClipboardList} onClick={() => router.push('/ordens')} />
+            <Atalho clean={clean} titulo="Orçamen." Icone={ClipboardList} onClick={() => router.push('/orcamento')} />
             <Atalho clean={clean} titulo="Faturam." Icone={CircleDollarSign} onClick={() => router.push('/faturamento')} />
             <Atalho clean={clean} titulo="Config." Icone={Settings} onClick={() => router.push('/configuracao')} />
           </div>
